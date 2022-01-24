@@ -21,7 +21,7 @@ When minting a CryptoCocks token, we store on-chain your balance
 We calculate the [Percentile Rank (PR)](https://en.wikipedia.org/wiki/Percentile_rank), i.e., the percentage of
 balances in its frequency distribution that are less than the minter's current wallet balance.
 We bin the continuous PRs (e.g. 33% or 99%) uniformly into 10 intervals such that
-all bins have nearly identical widths. We map these 10 intervals bijectively to the 10 cock lengths, so that PRs in [0,10) are mapped to cock length 1, PRs in [20,30) are mapped to cock length 2, ..., PRs in [90,100] are mapped to cock length 100.
+all bins have nearly identical widths. We map these 10 intervals (decentiles) to the 10 cock lengths, so that PRs in [0,10) are mapped to cock length 1, PRs in [20,30) are mapped to cock length 2, ..., PRs in [90,100) are mapped to cock length 10. Only the largest balance at the point in time of the mint will receive a special length, namely 11, which persists this information on the blockchain (i.e., see token URI and linked metadata fields).
 
 In other words, this means that someone's cock will be as short as possible (length 1 of 10) if that minter's balance at the time of minting is no greater or equal to 10% of all the balances of the previous minters. 90% of previous minters have made a larger investment to obtain a CryptoCock.
 
