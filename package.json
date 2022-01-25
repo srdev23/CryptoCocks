@@ -6,7 +6,7 @@
     "test": "hardhat test",
     "test:no-logs": "HIDE_CONTRACT_LOGS=true hardhat test",
     "test:gas": "HIDE_CONTRACT_LOGS=true REPORT_GAS=true hardhat test",
-    "check": "hardhat check",
+    "check": "hardhat check && npx solhint contracts/** -w 0",
     "coverage": "hardhat coverage",
     "lint": "eslint '**/*.{js,ts}'",
     "lint:fix": "hardhat compile && eslint '**/*.{js,ts}' --fix"
