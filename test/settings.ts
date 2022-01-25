@@ -1,43 +1,33 @@
 import { expect } from "chai";
 import { ethers } from "hardhat";
-import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
 // eslint-disable-next-line node/no-missing-import
-import { CryptoCocks } from "../typechain";
-// eslint-disable-next-line node/no-missing-import
-import { deployContracts } from "./helper";
+import { Accounts, Contracts, deploy, getAccounts } from "./deploy";
 
-describe("CryptoCocks Settings", function () {
-  let cryptoCocks: CryptoCocks;
-
-  let owner: SignerWithAddress;
-  let nonOwner: SignerWithAddress;
+describe("Settings", function () {
+  let contracts: Contracts;
+  let accounts: Accounts;
 
   beforeEach(async () => {
-    const deployed = await deployContracts();
-    owner = deployed.owner;
-    nonOwner = deployed.nonOwner;
-    cryptoCocks = deployed.cryptoCocks;
+    accounts = getAccounts(await ethers.getSigners());
+    contracts = await deploy(accounts);
   });
 
-  /*
- ████████╗███████╗███████╗████████╗    ███████╗███████╗████████╗████████╗██╗███╗   ██╗ ██████╗ ███████╗
- ╚══██╔══╝██╔════╝██╔════╝╚══██╔══╝    ██╔════╝██╔════╝╚══██╔══╝╚══██╔══╝██║████╗  ██║██╔════╝ ██╔════╝
-    ██║   █████╗  ███████╗   ██║       ███████╗█████╗     ██║      ██║   ██║██╔██╗ ██║██║  ███╗███████╗
-    ██║   ██╔══╝  ╚════██║   ██║       ╚════██║██╔══╝     ██║      ██║   ██║██║╚██╗██║██║   ██║╚════██║
-    ██║   ███████╗███████║   ██║       ███████║███████╗   ██║      ██║   ██║██║ ╚████║╚██████╔╝███████║
-    ╚═╝   ╚══════╝╚══════╝   ╚═╝       ╚══════╝╚══════╝   ╚═╝      ╚═╝   ╚═╝╚═╝  ╚═══╝ ╚═════╝ ╚══════╝
-  */
-
-  it("should have no supply", async function () {
-    expect(await cryptoCocks.totalSupply()).to.equal(0);
+  it("should initially have no supply", async function () {
+    expect(await contracts.cryptoCocks.totalSupply()).to.equal(0);
   });
 
   it("should be possible to change PublicSalesStatus by owner only", async () => {
-    await expect(cryptoCocks.connect(owner).changePublicSaleStatus(false)).to
-      .not.be.reverted;
+    await expect(
+      contracts.cryptoCocks
+        .connect(accounts.owner)
+        .changePublicSaleStatus(false)
+    ).to.not.be.reverted;
 
-    await expect(cryptoCocks.connect(nonOwner).changePublicSaleStatus(false)).to
-      .be.reverted;
+    await expect(
+      contracts.cryptoCocks
+        .connect(accounts.nonOwner)
+        .changePublicSaleStatus(false)
+    ).to.be.reverted;
   });
 
   it("should be possible to execute changeFeeSettings by owner only", async () => {
@@ -45,12 +35,14 @@ describe("CryptoCocks Settings", function () {
     const percFee = 80;
     const minFee = ethers.utils.parseEther("0.01");
     await expect(
-      cryptoCocks.connect(owner).changeFeeSettings(freeMinting, percFee, minFee)
+      contracts.cryptoCocks
+        .connect(accounts.owner)
+        .changeFeeSettings(freeMinting, percFee, minFee)
     ).to.not.be.reverted;
 
     await expect(
-      cryptoCocks
-        .connect(nonOwner)
+      contracts.cryptoCocks
+        .connect(accounts.nonOwner)
         .changeFeeSettings(freeMinting, percFee, minFee)
     ).to.be.reverted;
   });
@@ -60,7 +52,9 @@ describe("CryptoCocks Settings", function () {
     const percFee = 0;
     const minFee = ethers.utils.parseEther("0.02");
     await expect(
-      cryptoCocks.connect(owner).changeFeeSettings(freeMinting, percFee, minFee)
+      contracts.cryptoCocks
+        .connect(accounts.owner)
+        .changeFeeSettings(freeMinting, percFee, minFee)
     ).to.be.revertedWith("DIVIDE_BY_ZERO");
   });
 });
