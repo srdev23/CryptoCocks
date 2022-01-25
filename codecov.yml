@@ -1,4 +1,4 @@
 ignore:
-  - "contracts/TestContractOne.sol"
-  - "contracts/TestContractTwo.sol"
+  - "./contracts/TestContractOne.sol"
+  - "./contracts/TestContractTwo.sol"
 require_ci_to_pass: true

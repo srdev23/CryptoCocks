@@ -22,7 +22,6 @@ jobs:
       - uses: codecov/codecov-action@v2
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
-          files: ./codecov.yml
           fail_ci_if_error: true
           verbose: true
   lint:
