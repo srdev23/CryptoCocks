@@ -4,7 +4,6 @@ import { HardhatUserConfig, task } from "hardhat/config";
 import { HardhatNetworkAccountUserConfig } from "hardhat/types/config";
 import { deriveKeyFromMnemonicAndPath } from "hardhat/internal/util/keys-derivation";
 import { bufferToHex } from "ethereumjs-util";
-import "@nomiclabs/hardhat-solhint";
 import "@nomiclabs/hardhat-etherscan";
 import "@nomiclabs/hardhat-waffle";
 import "@typechain/hardhat";
