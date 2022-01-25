@@ -1,6 +1,4 @@
- <a href="https://codecov.io/gh/cocodigrande2021/cryptococks-contract">
-    <img src="https://codecov.io/gh/cocodigrande2021/cryptococks-contract/branch/master/graph/badge.svg?token=SU15AOAFWE"/>
-</a>
+ [![codecov](https://codecov.io/gh/cocodigrande2021/cc-contract/branch/main/graph/badge.svg?token=asPY4Xi5U7)](https://codecov.io/gh/cocodigrande2021/cc-contract)
 
 <a href="https://cryptococks.xyz/">
  <p align="center">
