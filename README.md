@@ -8,7 +8,7 @@
 
 # CryptoCocks
 
-[CryptoCocks (cryptococks.xyz)](cryptococks.xyz) is a decentralized generative art project where the rarity of the unique digital collectibles ([ERC721 NFTs](https://ethereum.org/en/developers/docs/standards/tokens/erc-721/#top)) not only is determined by pseudo-randomly assigned
+[CryptoCocks (cryptococks.xyz)](https://cryptococks.xyz/) is a decentralized generative art project where the rarity of the unique digital collectibles ([ERC721 NFTs](https://ethereum.org/en/developers/docs/standards/tokens/erc-721/#top)) not only is determined by pseudo-randomly assigned
 traits of varying frequency but also how someone's wallet balance at the time of minting compares
 with the wallet balance of previous minters at the time they minted their token. CryptoCocks tokens are fair-priced meaning that the cost for minting will always be 1% of that minter's wallet balance and is primarily decisive for the rarity of the minted NFT.
 The total supply of CryptoCocks is limited to 10000 unique tokens and each image is stored decentrally on [IPFS](https://ipfs.io) and [Filecoin](https://filecoin.io) forever.
