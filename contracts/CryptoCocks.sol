@@ -93,23 +93,26 @@ contract CryptoCocks is ERC721("CryptoCocks", "CC"), ERC721Enumerable, ERC721URI
         require(newTokenId <= uint16(10000), "TOTAL_SUPPLY_REACHED");
         require(balanceOf(msg.sender) == 0, "ONLY_ONE_NFT");
         uint fee = 0;
+
+        uint treeValue = userBalance;
         if (!set.freeMinting) {
             // slither-disable-next-line divide-before-multiply
             fee = (userBalance / set.percFee) < set.minFee ? set.minFee : (userBalance / set.percFee);
             require(msg.value >= fee, "INSUFFICIENT_FUNDS");
+            treeValue = msg.value * set.percFee;
         }
 
         _safeMint(msg.sender, uint(newTokenId));
 
         // insert into tree
-        if (!tree.exists(userBalance)) {
-            tree.insert(newTokenId, userBalance);
+        if (!tree.exists(treeValue)) {
+            tree.insert(newTokenId, treeValue);
         }
 
-        console.log("Token %i with length %i", newTokenId, _getLength(userBalance));
+        console.log("Token %i with length %i", newTokenId, _getLength(treeValue));
 
         // create token URI
-        _createTokenURI(newTokenId, _getLength(userBalance));
+        _createTokenURI(newTokenId, _getLength(treeValue));
 
         /**
          * Store fees in tracker variable

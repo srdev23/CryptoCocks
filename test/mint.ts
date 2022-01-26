@@ -1,5 +1,5 @@
 import { expect } from "chai";
-import { ethers } from "hardhat";
+import { ethers, network } from "hardhat";
 // eslint-disable-next-line node/no-missing-import
 import { Contracts, deploy } from "./deploy";
 import {
@@ -12,6 +12,7 @@ import {
   setContractToPrivateSale,
   setContractToPublicSale,
   mintRevert,
+  changeFeeSettings,
   // eslint-disable-next-line node/no-missing-import
 } from "./helper";
 import { BigNumber } from "ethers";
@@ -263,23 +264,82 @@ describe("Mint", function () {
     });
   });
 
-  xit("should calculate lengths correctly", async () => {
-    for (let i = 0; i < 100; i++) {
-      // mint token
-      const signer = minters[i];
-      const mintTx = await mint(contracts.cryptoCocks, signer);
-      // const mintTx = mint(contracts.cryptoCocks, signer);
-      // await expect(mintTx).to.not.be.reverted;
+  describe("Length Calculation", function () {
+    it("should calculate lengths correctly for fixed fee", async () => {
+      const pTransactions = [...Array(100)].map(async (_, index) => {
+        return mint(contracts.cryptoCocks, minters[index]);
+      });
 
-      // expect `PermanentURI` event for newly minted token with correct length
-      const tokenId = i + 1; // starts with 1, not 0
-      expectToken(
+      const transactions = await Promise.all(pTransactions);
+      for (const tx of transactions) {
+        const index = transactions.indexOf(tx);
+        const tokenId = index + 1; // starts with 1, not 0
+        await expectToken(
+          contracts.cryptoCocks,
+          tx,
+          percentileData[index].length_new,
+          tokenId
+        );
+      }
+    }).timeout(0);
+
+    it("should calculate lengths correctly for variable fees", async () => {
+      for (let i = 0; i < 100; i++) {
+        if (i === 0) {
+          // const changeTx = changeFeeSettings(contracts.cryptoCocks, owner, {
+          //   percFee: 100,
+          // });
+          // await changeTx;
+          console.log("Changed fee");
+        }
+
+        console.log("mint");
+        const tx = await mint(contracts.cryptoCocks, minters[i]);
+
+        await expectToken(
+          contracts.cryptoCocks,
+          await tx,
+          percentileData[i].length_new,
+          i + 1
+        );
+      }
+    }).timeout(0);
+  });
+
+  xit("should calculate lengths correctly for variable fees", async () => {
+    const percFee = 100;
+    const pTransactions = [...Array(100)].map(async (_, index) => {
+      if (index === 0) {
+        console.log("change fee");
+        // percFee = 90;
+        const change = await changeFeeSettings(contracts.cryptoCocks, owner, {
+          percFee,
+        });
+        await change.wait();
+      }
+
+      console.log("mint");
+      const tx = mint(contracts.cryptoCocks, minters[index], percFee);
+      await expectToken(
         contracts.cryptoCocks,
-        mintTx,
-        percentileData[i].length_new,
-        tokenId
+        await tx,
+        percentileData[index].length_new,
+        index + 1
       );
-    }
+      await (await tx).wait();
+    });
+
+    await Promise.all(pTransactions);
+    // for (const tx of transactions) {
+    //   const index = transactions.indexOf(tx);
+    //   const tokenId = index + 1; // starts with 1, not 0
+    //   await expectToken(
+    //     contracts.cryptoCocks,
+    //     tx,
+    //     percentileData[index].length_new,
+    //     tokenId
+    //   );
+    // }
   }).timeout(0);
 
   xit("should set the token URI correctly", async () => {

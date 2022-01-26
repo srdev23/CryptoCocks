@@ -68,10 +68,11 @@ export async function setContractToPublicSale(
  * when necessary a minimum of 0.02 Ether.
  *
  * @param signer Signer
+ * @param percFee Fee [0, ...)
  */
-export async function getMintValue(signer: Signer) {
+export async function getMintValue(signer: Signer, percFee: number = 100) {
   const balance = await signer.getBalance();
-  let value = balance.div(100); // 1% or 1/100 of balance
+  let value = balance.div(percFee); // 1% or 1/100 of balance
   if (!value.gte(ethers.utils.parseEther("0.02"))) {
     value = ethers.utils.parseEther("0.02"); // minimum of 0.02 Eth
   }
@@ -155,9 +156,10 @@ export async function mintTestToken(
 
 export async function mint(
   cryptoCocks: CryptoCocks,
-  minter: SignerWithAddress
+  minter: SignerWithAddress,
+  percFee: number = 100
 ) {
-  const value = await getMintValue(minter);
+  const value = await getMintValue(minter, percFee);
   const pTx = cryptoCocks.connect(minter).mint({
     value,
   });
@@ -169,22 +171,50 @@ export async function mint(
 export async function mintRevert(
   cryptoCocks: CryptoCocks,
   minter: SignerWithAddress,
-  reason: string = "LOCK"
+  reason: string = "LOCK",
+  percFee: number = 100
 ) {
-  const value = await getMintValue(minter);
+  const value = await getMintValue(minter, percFee);
   const pTx = cryptoCocks.connect(minter).mint({
     value,
   });
   await expect(pTx).to.be.revertedWith(reason);
 }
 
-export function expectToken(
+export async function expectToken(
   cryptoCocks: CryptoCocks,
   mintTx: ContractTransaction,
   length: string,
   tokenId: number
 ) {
-  expect(mintTx)
+  await expect(mintTx)
     .to.emit(cryptoCocks, "PermanentURI")
     .withArgs(`${length}/${tokenId}/metadata.json`, BigNumber.from(tokenId));
+}
+
+export interface FeeSettings {
+  freeMinting?: boolean;
+  percFee?: number;
+  minFee?: number;
+}
+
+export async function changeFeeSettings(
+  cryptoCocks: CryptoCocks,
+  owner: Signer,
+  feeSettings: FeeSettings
+) {
+  const minFee = feeSettings.minFee ?? 0.02;
+  const percFee = feeSettings.percFee ?? 100;
+  return cryptoCocks
+    .connect(owner)
+    .changeFeeSettings(false, 100, ethers.utils.parseEther("0.02"));
+  // await expect(
+  //   cryptoCocks
+  //     .connect(owner)
+  //     .changeFeeSettings(
+  //       feeSettings.freeMinting ?? false,
+  //       percFee,
+  //       ethers.utils.parseEther(minFee.toString())
+  //     )
+  // ).to.not.be.reverted;
 }
