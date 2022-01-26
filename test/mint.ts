@@ -305,7 +305,7 @@ describe("Mint", function () {
     await mintRevert(contracts.cryptoCocks, minter, "ONLY_ONE_NFT");
   });
 
-  it("should remove the right amount of Ether from the minter's wallet", async () => {
+  it("should send the right amount of Ether from the minter's wallet to the contract", async () => {
     const minter = signers[1];
     const value = await getMintValue(minter);
 
@@ -313,7 +313,12 @@ describe("Mint", function () {
       value,
     });
 
-    await expect(() => tx).to.changeEtherBalance(minter, value.mul(-1));
+    // remove value from minter's wallet,
+    // add value to contract
+    await expect(() => tx).to.changeEtherBalances(
+      [minter, contracts.cryptoCocks],
+      [value.mul(-1), value]
+    );
     await expect(tx).to.not.be.reverted;
   });
 });
