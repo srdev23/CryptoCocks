@@ -2,12 +2,7 @@
 import { CryptoCocks, TestToken } from "../typechain";
 import { expect } from "chai";
 import { ethers } from "hardhat";
-import {
-  BigNumber,
-  ContractReceipt,
-  ContractTransaction,
-  Signer,
-} from "ethers";
+import { BigNumber, ContractTransaction, Signer } from "ethers";
 import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
 
 /**
@@ -81,20 +76,6 @@ export async function getMintValue(signer: Signer) {
     value = ethers.utils.parseEther("0.02"); // minimum of 0.02 Eth
   }
   return value;
-}
-
-// TODO MF: Do we really need this?
-export async function getAdjustedMintValue(
-  initialBalance: BigNumber,
-  mintTx: ContractTransaction,
-  receipt: ContractReceipt
-) {
-  const gasCost = mintTx.gasLimit.mul(receipt.effectiveGasPrice);
-  let adjustedValue = initialBalance.sub(gasCost).div(100);
-  if (!adjustedValue.gte(ethers.utils.parseEther("0.02"))) {
-    adjustedValue = ethers.utils.parseEther("0.02"); // minimum of 0.02 Eth
-  }
-  return adjustedValue.div(10);
 }
 
 /**
