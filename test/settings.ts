@@ -1,15 +1,17 @@
 import { expect } from "chai";
 import { ethers } from "hardhat";
 // eslint-disable-next-line node/no-missing-import
-import { Accounts, Contracts, deploy, getAccounts } from "./deploy";
+import { Contracts, deploy } from "./deploy";
+import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
 
 describe("Settings", function () {
   let contracts: Contracts;
-  let accounts: Accounts;
+  let owner: SignerWithAddress;
+  let nonOwner: SignerWithAddress;
 
   beforeEach(async () => {
-    accounts = getAccounts(await ethers.getSigners());
-    contracts = await deploy(accounts);
+    [owner, nonOwner] = await ethers.getSigners();
+    contracts = await deploy(owner);
   });
 
   it("should initially have no supply", async function () {
@@ -18,15 +20,11 @@ describe("Settings", function () {
 
   it("should be possible to change PublicSalesStatus by owner only", async () => {
     await expect(
-      contracts.cryptoCocks
-        .connect(accounts.owner)
-        .changePublicSaleStatus(false)
+      contracts.cryptoCocks.connect(owner).changePublicSaleStatus(false)
     ).to.not.be.reverted;
 
     await expect(
-      contracts.cryptoCocks
-        .connect(accounts.nonOwner)
-        .changePublicSaleStatus(false)
+      contracts.cryptoCocks.connect(nonOwner).changePublicSaleStatus(false)
     ).to.be.reverted;
   });
 
@@ -36,13 +34,13 @@ describe("Settings", function () {
     const minFee = ethers.utils.parseEther("0.01");
     await expect(
       contracts.cryptoCocks
-        .connect(accounts.owner)
+        .connect(owner)
         .changeFeeSettings(freeMinting, percFee, minFee)
     ).to.not.be.reverted;
 
     await expect(
       contracts.cryptoCocks
-        .connect(accounts.nonOwner)
+        .connect(nonOwner)
         .changeFeeSettings(freeMinting, percFee, minFee)
     ).to.be.reverted;
   });
@@ -53,7 +51,7 @@ describe("Settings", function () {
     const minFee = ethers.utils.parseEther("0.02");
     await expect(
       contracts.cryptoCocks
-        .connect(accounts.owner)
+        .connect(owner)
         .changeFeeSettings(freeMinting, percFee, minFee)
     ).to.be.revertedWith("DIVIDE_BY_ZERO");
   });

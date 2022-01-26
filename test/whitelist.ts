@@ -1,16 +1,14 @@
 import { expect } from "chai";
 import { ethers } from "hardhat";
-import { BigNumber } from "ethers";
 // eslint-disable-next-line node/no-missing-import
-import { loadPercentileData, PercentileDataEntry } from "./percentiles";
 import {
-  Accounts,
   Contracts,
   deploy,
-  getAccounts,
   // eslint-disable-next-line node/no-missing-import
 } from "./deploy";
+// eslint-disable-next-line node/no-missing-import
 import { addWhitelistedContract } from "./helper";
+import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
 
 /*
 ███████╗███████╗████████╗██╗   ██╗██████╗
@@ -23,12 +21,15 @@ import { addWhitelistedContract } from "./helper";
 
 describe("Whitelist", function () {
   let contracts: Contracts;
-  let accounts: Accounts;
+  let owner: SignerWithAddress;
+  let nonOwner: SignerWithAddress;
+  let minters: SignerWithAddress[];
   // let percentileData: PercentileDataEntry[];
 
   beforeEach(async () => {
-    accounts = getAccounts(await ethers.getSigners());
-    contracts = await deploy(accounts);
+    [owner, ...minters] = await ethers.getSigners();
+    nonOwner = minters[0];
+    contracts = await deploy(owner);
     // percentileData = await loadPercentileData();
     // await mintTestContractTokens(contracts, accounts, percentileData);
   });
@@ -37,12 +38,12 @@ describe("Whitelist", function () {
     const percRoyal = 10;
     const maxSupply = 2;
     const minBalance = 100;
-    const communityWallet = accounts.communityWallet1;
+    const communityWallet = minters[0];
     const testToken = contracts.testTokenOne;
 
     await addWhitelistedContract(
       contracts.cryptoCocks,
-      accounts.owner,
+      owner,
       testToken,
       communityWallet,
       maxSupply,

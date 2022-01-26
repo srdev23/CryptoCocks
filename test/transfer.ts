@@ -1,15 +1,19 @@
 import { expect } from "chai";
 import { ethers } from "hardhat";
 // eslint-disable-next-line node/no-missing-import
-import { Accounts, Contracts, deploy, getAccounts } from "./deploy";
+import { Contracts, deploy } from "./deploy";
+import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
 
 describe("Transfers", function () {
   let contracts: Contracts;
-  let accounts: Accounts;
+  let owner: SignerWithAddress;
+  let nonOwner: SignerWithAddress;
+  let minters: SignerWithAddress[];
 
   beforeEach(async () => {
-    accounts = getAccounts(await ethers.getSigners());
-    contracts = await deploy(accounts);
+    [owner, ...minters] = await ethers.getSigners();
+    nonOwner = minters[0];
+    contracts = await deploy(owner);
   });
 
   xit("should not be possible to withdraw balance for non-whitelisted wallets", async () => {
