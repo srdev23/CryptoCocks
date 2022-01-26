@@ -1,5 +1,5 @@
 import * as dotenv from "dotenv";
-import { HardhatUserConfig, task } from "hardhat/config";
+import { HardhatUserConfig } from "hardhat/config";
 import "@nomiclabs/hardhat-etherscan";
 import "@nomiclabs/hardhat-waffle";
 import "@typechain/hardhat";
@@ -8,6 +8,8 @@ import "solidity-coverage";
 import "hardhat-abi-exporter";
 import "hardhat-contract-sizer";
 import { removeConsoleLog } from "hardhat-preprocessor";
+import { HardhatRuntimeEnvironment } from "hardhat/types";
+const accounts = require("./accounts.json");
 
 dotenv.config();
 
@@ -15,11 +17,7 @@ const config: HardhatUserConfig = {
   solidity: "0.8.7",
   networks: {
     hardhat: {
-      accounts: {
-        mnemonic:
-          "hollow cycle obscure tumble office alarm slam fragile online peace wink together",
-        count: 100,
-      },
+      accounts,
     },
     ropsten: {
       url: process.env.ROPSTEN_URL || "",
@@ -37,7 +35,7 @@ const config: HardhatUserConfig = {
   },
   preprocess: {
     eachLine: removeConsoleLog(
-      (hre) =>
+      (hre: HardhatRuntimeEnvironment) =>
         (hre.network.name !== "hardhat" && hre.network.name !== "localhost") ||
         process.env.HIDE_CONTRACT_LOGS === "true"
     ),
@@ -49,15 +47,5 @@ const config: HardhatUserConfig = {
     disambiguatePaths: false,
   },
 };
-
-// This is a sample Hardhat task. To learn how to create your own go to
-// https://hardhat.org/guides/create-task.html
-task("accounts", "Prints the list of accounts", async (taskArgs, hre) => {
-  const accounts = await hre.ethers.getSigners();
-
-  for (const account of accounts) {
-    console.log(account.address);
-  }
-});
 
 export default config;
