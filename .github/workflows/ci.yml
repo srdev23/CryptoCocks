@@ -64,4 +64,5 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-node-
       - run: npm install
+      - run: npm run generate:accounts
       - run: slither . --filter-paths "hardhat|openzeppelin"
