@@ -2,7 +2,7 @@
 
 <a href="https://cryptococks.xyz/">
  <p align="center">
-   <img src="https://github.com/cocodigrande2021/cryptococks-contract/raw/master/logo.png" width="320" alt="CryptoCocks" />
+   <img src="https://github.com/cocodigrande2021/cc-contract/raw/main/logo.png" width="320" alt="CryptoCocks" />
  </p>
 </a>
 
