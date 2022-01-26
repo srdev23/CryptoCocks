@@ -172,28 +172,29 @@ export async function mintTestToken(
   });
 }
 
-/**
- * Mint a CryptoCocks token for the specified minter
- *
- * @param cryptoCocks Deployed CryptoCocks contract
- * @param minter Minter to receive the token
- */
 export async function mint(
-  cryptoCocks: CryptoCocks,
-  minter: Signer
-): Promise<ContractTransaction> {
-  return cryptoCocks.connect(minter).mint({
-    value: await getMintValue(minter),
-  });
-}
-
-export async function mintAndAssert(
   cryptoCocks: CryptoCocks,
   minter: SignerWithAddress
 ) {
-  const pTx = mint(cryptoCocks, minter);
+  const value = await getMintValue(minter);
+  const pTx = cryptoCocks.connect(minter).mint({
+    value,
+  });
+  await expect(() => pTx).to.changeEtherBalance(minter, value.mul(-1));
   await expect(pTx).to.not.be.reverted;
   return pTx;
+}
+
+export async function mintRevert(
+  cryptoCocks: CryptoCocks,
+  minter: SignerWithAddress,
+  reason: string = "LOCK"
+) {
+  const value = await getMintValue(minter);
+  const pTx = cryptoCocks.connect(minter).mint({
+    value,
+  });
+  await expect(pTx).to.be.revertedWith(reason);
 }
 
 export function expectToken(

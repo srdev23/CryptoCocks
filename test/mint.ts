@@ -5,12 +5,13 @@ import { Accounts, Contracts, deploy, getAccounts } from "./deploy";
 import {
   addWhitelistedContract,
   expectToken,
+  getMintValue,
   mint,
-  mintAndAssert,
   mintTestToken,
   setContractToFreeSale,
   setContractToPrivateSale,
   setContractToPublicSale,
+  mintRevert,
   // eslint-disable-next-line node/no-missing-import
 } from "./helper";
 import { BigNumber } from "ethers";
@@ -39,9 +40,8 @@ describe("Mint", function () {
     });
 
     it("should not be possible to mint publicly", async () => {
-      const signer = signers[0];
-      const mintTx = mint(contracts.cryptoCocks, signer);
-      await expect(mintTx).to.be.revertedWith("LOCK");
+      const minter = signers[0];
+      await mintRevert(contracts.cryptoCocks, minter);
     });
 
     it("should not be possible to execute initial mint by non-owner", async () => {
@@ -82,10 +82,8 @@ describe("Mint", function () {
           minBalance // enough balance to be permitted to mint
         );
 
-        await expect(mint(contracts.cryptoCocks, signer1)).to.not.be.reverted;
-        await expect(mint(contracts.cryptoCocks, signer2)).to.be.revertedWith(
-          "LOCK"
-        );
+        await mint(contracts.cryptoCocks, signer1);
+        await mintRevert(contracts.cryptoCocks, signer2);
 
         // tracks the number of minted tokens for TestTokenOne
         const contract = await contracts.cryptoCocks.list(0);
@@ -202,7 +200,7 @@ describe("Mint", function () {
           signerTokenTwo,
           signerTokenBoth,
         ]) {
-          await mintAndAssert(contracts.cryptoCocks, signer);
+          await mint(contracts.cryptoCocks, signer);
         }
 
         // tracks the number of minted tokens for TestTokenOne
@@ -224,9 +222,7 @@ describe("Mint", function () {
           minBalanceTokenOne - 1 // not enough balance of the whitelisted token
         );
 
-        await expect(mint(contracts.cryptoCocks, signer)).to.be.revertedWith(
-          "LOCK"
-        );
+        await mintRevert(contracts.cryptoCocks, signer);
 
         // tracks the number of minted tokens for TestTokenOne
         const contract1 = await contracts.cryptoCocks.list(0);
@@ -245,7 +241,7 @@ describe("Mint", function () {
     });
 
     it("should be possible to mint", async () => {
-      await mintAndAssert(contracts.cryptoCocks, signers[0]);
+      await mint(contracts.cryptoCocks, signers[0]);
     });
 
     it("should revert when mint value is less than minimum fee", async () => {
@@ -263,7 +259,7 @@ describe("Mint", function () {
     });
 
     it("should be possible to mint", async () => {
-      await mintAndAssert(contracts.cryptoCocks, signers[0]);
+      await mint(contracts.cryptoCocks, signers[0]);
       // TODO MF: Assert how much balance was removed from minter's wallet
     });
   });
@@ -272,7 +268,7 @@ describe("Mint", function () {
     for (let i = 0; i < 100; i++) {
       // mint token
       const signer = signers[i];
-      const mintTx = await mintAndAssert(contracts.cryptoCocks, signer);
+      const mintTx = await mint(contracts.cryptoCocks, signer);
       // const mintTx = mint(contracts.cryptoCocks, signer);
       // await expect(mintTx).to.not.be.reverted;
 
@@ -289,9 +285,9 @@ describe("Mint", function () {
 
   xit("should set the token URI correctly", async () => {
     for (let i = 0; i < 100; i++) {
-      const signer = signers[i];
-      const mintTx = mint(contracts.cryptoCocks, signer);
-      await expect(mintTx).to.not.be.reverted;
+      // const signer = signers[i];
+      // const mintTx = mintOld(contracts.cryptoCocks, signer);
+      // await expect(mintTx).to.not.be.reverted;
 
       const tokenId = i + 1;
       const tokenUri = await contracts.cryptoCocks.tokenURI(tokenId);
@@ -305,9 +301,19 @@ describe("Mint", function () {
 
   it("should not be possible to mint more than one token", async () => {
     const minter = signers[0];
-    await mintAndAssert(contracts.cryptoCocks, minter);
-    await expect(mint(contracts.cryptoCocks, minter)).to.be.revertedWith(
-      "ONLY_ONE_NFT"
-    );
+    await mint(contracts.cryptoCocks, minter);
+    await mintRevert(contracts.cryptoCocks, minter, "ONLY_ONE_NFT");
+  });
+
+  it("should remove the right amount of Ether from the minter's wallet", async () => {
+    const minter = signers[1];
+    const value = await getMintValue(minter);
+
+    const tx = contracts.cryptoCocks.connect(minter).mint({
+      value,
+    });
+
+    await expect(() => tx).to.changeEtherBalance(minter, value.mul(-1));
+    await expect(tx).to.not.be.reverted;
   });
 });
