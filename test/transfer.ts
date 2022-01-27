@@ -88,6 +88,7 @@ describe("Transfers", function () {
     const maxSupply = 2;
     const minBalance = 100; // TODO MF: addWhitelistedContract should have defaults
     let communityWallet: SignerWithAddress;
+    let nonCommunityWallet: SignerWithAddress;
     let communityToken: TestToken;
     let communityTokenHolder: SignerWithAddress;
     let nonCommunityTokenHolder: SignerWithAddress;
@@ -96,6 +97,7 @@ describe("Transfers", function () {
       communityWallet = signer1;
       communityTokenHolder = signer2;
       nonCommunityTokenHolder = signer3;
+      nonCommunityWallet = signer3;
       communityToken = contracts.testTokenOne;
 
       await addWhitelistedContract(
@@ -138,6 +140,8 @@ describe("Transfers", function () {
         [expectedRoyalty.mul(-1), expectedRoyalty]
       );
     });
+
+    it("should not be possible to withdraw community royalty by non community wallet", async () => {});
   });
 
   it("should transfer fees with every 50th mint", async () => {
