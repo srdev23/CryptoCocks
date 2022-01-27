@@ -96,6 +96,7 @@ export async function getMintValue(signer: Signer, percFee: number = 100) {
  * @param maxSupply Maximum supply
  * @param minBalance Minimum balance
  * @param percRoyal Percentage royalties
+ * @param revert Expect the transaction to revert
  */
 export async function addWhitelistedContract(
   cryptoCocks: CryptoCocks,
@@ -104,7 +105,8 @@ export async function addWhitelistedContract(
   communityWallet: SignerWithAddress,
   maxSupply: number,
   minBalance: number,
-  percRoyal: number
+  percRoyal: number,
+  revert: boolean = false
 ) {
   const cc = testToken.address;
   const wallet = communityWallet.address;
@@ -112,24 +114,32 @@ export async function addWhitelistedContract(
   const initialSettings = await cryptoCocks.set();
   const initialNumContracts = initialSettings.numContracts;
 
-  await expect(
-    cryptoCocks
-      .connect(owner)
-      .addWhiteListing(cc, wallet, maxSupply, minBalance, percRoyal)
-  ).to.not.be.reverted;
+  if (revert) {
+    await expect(
+      cryptoCocks
+        .connect(owner)
+        .addWhiteListing(cc, wallet, maxSupply, minBalance, percRoyal)
+    ).to.be.reverted;
+  } else {
+    await expect(
+      cryptoCocks
+        .connect(owner)
+        .addWhiteListing(cc, wallet, maxSupply, minBalance, percRoyal)
+    ).to.not.be.reverted;
 
-  const settings = await cryptoCocks.set();
-  const numContracts = settings.numContracts;
-  const whiteListed = await cryptoCocks.list(numContracts - 1); // index starts with 0
+    const settings = await cryptoCocks.set();
+    const numContracts = settings.numContracts;
+    const whiteListed = await cryptoCocks.list(numContracts - 1); // index starts with 0
 
-  expect(numContracts).to.equal(initialNumContracts + 1);
-  expect(whiteListed.percRoyal).to.equal(percRoyal);
-  expect(whiteListed.maxSupply).to.equal(maxSupply);
-  expect(whiteListed.minBalance).to.equal(minBalance);
-  expect(whiteListed.tracker).to.equal(0);
-  expect(whiteListed.balance.toNumber()).to.equal(0);
-  expect(whiteListed.cc).to.equal(testToken.address);
-  expect(whiteListed.wallet).to.equal(communityWallet.address);
+    expect(numContracts).to.equal(initialNumContracts + 1);
+    expect(whiteListed.percRoyal).to.equal(percRoyal);
+    expect(whiteListed.maxSupply).to.equal(maxSupply);
+    expect(whiteListed.minBalance).to.equal(minBalance);
+    expect(whiteListed.tracker).to.equal(0);
+    expect(whiteListed.balance.toNumber()).to.equal(0);
+    expect(whiteListed.cc).to.equal(testToken.address);
+    expect(whiteListed.wallet).to.equal(communityWallet.address);
+  }
 }
 
 /**
@@ -160,6 +170,13 @@ export async function mintTestToken(
   });
 }
 
+/**
+ * Mint a token and assert that everything went as supposed
+ *
+ * @param cryptoCocks Deployed CryptoCocks contract
+ * @param minter Signer that mints a token
+ * @param percFee Fee Percentage that must equal the current setup in contract
+ */
 export async function mint(
   cryptoCocks: CryptoCocks,
   minter: SignerWithAddress,
@@ -174,6 +191,14 @@ export async function mint(
   return pTx;
 }
 
+/**
+ * Mint a token but expect a transaction revert.
+ *
+ * @param cryptoCocks Deployed CryptoCocks contract
+ * @param minter Signer that wants to mint a token
+ * @param reason Transaction revert reason
+ * @param percFee Fee Percentage that must equal the current setup in contract
+ */
 export async function mintRevert(
   cryptoCocks: CryptoCocks,
   minter: SignerWithAddress,
@@ -187,6 +212,15 @@ export async function mintRevert(
   await expect(pTx).to.be.revertedWith(reason);
 }
 
+/**
+ * Assert cock length and token id by looking at the
+ * emitted PermanentURI.
+ *
+ * @param cryptoCocks Deployed CryptoCocks contract
+ * @param mintTx Mint transaction
+ * @param length Expected cock length
+ * @param tokenId Expected token id
+ */
 export async function expectToken(
   cryptoCocks: CryptoCocks,
   mintTx: ContractTransaction,
@@ -204,13 +238,17 @@ export interface FeeSettings {
   minFee?: number;
 }
 
+/**
+ * Gets a signer from the generated accounts
+ * for the test network.
+ */
 export async function getMinter(
-  minters: SignerWithAddress[],
+  signers: SignerWithAddress[],
   chunk: number,
   index: number,
   percentileData?: PercentileDataEntry[]
 ): Promise<SignerWithAddress> {
-  const minter = minters[chunk * 100 + index];
+  const minter = signers[chunk * 100 + index];
   const balance = await minter.getBalance();
   if (percentileData) {
     expect(balance).to.equal(
@@ -220,6 +258,14 @@ export async function getMinter(
   return minter;
 }
 
+/**
+ * Updates the fee settings in the contract
+ * by sending a changeFeeSettings transaction
+ *
+ * @param cryptoCocks Deployed CryptoCocks contract
+ * @param owner Owner of CryptoCocks contract
+ * @param feeSettings New Fee Settings
+ */
 export async function changeFeeSettings(
   cryptoCocks: CryptoCocks,
   owner: Signer,

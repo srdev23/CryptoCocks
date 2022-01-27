@@ -10,31 +10,16 @@ import {
 import { addWhitelistedContract } from "./helper";
 import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
 
-/*
-███████╗███████╗████████╗██╗   ██╗██████╗
-██╔════╝██╔════╝╚══██╔══╝██║   ██║██╔══██╗
-███████╗█████╗     ██║   ██║   ██║██████╔╝
-╚════██║██╔══╝     ██║   ██║   ██║██╔═══╝
-███████║███████╗   ██║   ╚██████╔╝██║
-╚══════╝╚══════╝   ╚═╝    ╚═════╝ ╚═╝
-*/
-
-describe("Whitelist", function () {
+describe("Adding Whitelisted Contracts", function () {
   let contracts: Contracts;
   let owner: SignerWithAddress,
     nonOwner: SignerWithAddress,
-    signer1: SignerWithAddress,
-    signer2: SignerWithAddress,
-    signer3: SignerWithAddress,
-    signer4: SignerWithAddress;
-  // let percentileData: PercentileDataEntry[];
+    signer1: SignerWithAddress;
 
   beforeEach(async () => {
-    [owner, signer1, signer2, signer3, signer4] = await ethers.getSigners();
+    [owner, signer1] = await ethers.getSigners();
     nonOwner = signer1;
     contracts = await deploy(owner);
-    // percentileData = await loadPercentileData();
-    // await mintTestContractTokens(contracts, accounts, percentileData);
   });
 
   it("should be possible to add a whitelisted contract", async () => {
@@ -71,48 +56,50 @@ describe("Whitelist", function () {
     ).to.be.reverted;
   });
 
-  // it("should be possible to add a white listing contracts up to total 20% royalty fee", async () => {
-  //   // Add additional 10% fee contract with contracts.testTokenTwo
-  //   const cc = contracts.testTokenTwo.address;
-  //   const wallet = accounts.communityWallet2.address;
-  //   const maxSupply = 2;
-  //   const minBalance = 100;
-  //   const percRoyal = 10;
-  //   await expect(
-  //     contracts.cryptoCocks
-  //       .connect(accounts.owner)
-  //       .addWhiteListing(cc, wallet, maxSupply, minBalance, percRoyal)
-  //   ).to.be.not.reverted;
-  //
-  //   const whiteListed = await contracts.cryptoCocks.list(1);
-  //
-  //   expect(whiteListed.percRoyal).to.equal(percRoyal);
-  //   expect(whiteListed.maxSupply).to.equal(maxSupply);
-  //   expect(whiteListed.minBalance).to.equal(minBalance);
-  //   expect(whiteListed.tracker).to.equal(0);
-  //   expect(whiteListed.balance.toNumber()).to.equal(0);
-  //   expect(whiteListed.cc).to.equal(cc);
-  //   expect(whiteListed.wallet).to.equal(wallet);
-  //
-  //   // Check if numContracts was increased
-  //   const settings = await contracts.cryptoCocks.set();
-  //   expect(settings.numContracts).to.equal(2);
-  // });
-  //
-  // it("should not be possible to add a white listing contract with more than 20% royalty fee", async () => {
-  //   const cc = contracts.testTokenOne.address;
-  //   const wallet = accounts.communityWallet1.address;
-  //   const supply = 10;
-  //   const balance = 100;
-  //   const royalty = 1;
-  //
-  //   await expect(
-  //     contracts.cryptoCocks
-  //       .connect(accounts.owner)
-  //       .addWhiteListing(cc, wallet, supply, balance, royalty)
-  //   ).to.be.revertedWith("FEE_TOO_HIGH");
-  // });
-  //
+  it("should be able to add whitelisted contracts with royalty percentages up to 20% in sum", async () => {
+    const percRoyals = [8, 6, 3, 2, 1];
+    const communityWallet = signer1;
+    const testToken = contracts.testTokenOne;
+
+    for (const percRoyal of percRoyals) {
+      await addWhitelistedContract(
+        contracts.cryptoCocks,
+        owner,
+        testToken,
+        communityWallet,
+        2,
+        100,
+        percRoyal
+      );
+    }
+  });
+
+  it("should not be able to add whitelisted contracts with royalty percentages more than 20% in sum", async () => {
+    const percRoyals = [8, 6, 4, 1, 2]; // 21% (last transaction should fail)
+    const communityWallet = signer1;
+    const testToken = contracts.testTokenOne;
+
+    for (const percRoyal of percRoyals) {
+      // last transaction should fail
+      const index = percRoyals.indexOf(percRoyal);
+      let expectRevert = false;
+      if (index === percRoyals.length - 1) {
+        expectRevert = true;
+      }
+
+      await addWhitelistedContract(
+        contracts.cryptoCocks,
+        owner,
+        testToken,
+        communityWallet,
+        2,
+        100,
+        percRoyal,
+        expectRevert
+      );
+    }
+  });
+
   // it("should be possible to receive balanceOf from external contracts via TokenInterface", async () => {
   //   // accounts.signerTokenOneBelow
   //   const queryTokenOneBelow = contracts.cryptoCocks.queryBalance(

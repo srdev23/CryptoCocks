@@ -42,45 +42,47 @@ describe("Transfers", function () {
     donation = provider.getSigner(DONATION_WALLET);
   });
 
-  it("should collect 50% of sent ether for the team", async () => {
-    await assertCollectedBalance(
-      contracts.cryptoCocks,
-      BigNumber.from(0),
-      "team"
-    );
+  describe("Split Sent Ether", function () {
+    it("should collect 50% of sent ether for the team", async () => {
+      await assertCollectedBalance(
+        contracts.cryptoCocks,
+        BigNumber.from(0),
+        "team"
+      );
 
-    // mint
-    const minter = signer1;
-    const value = await getMintValue(minter);
-    await mint(contracts.cryptoCocks, minter);
+      // mint
+      const minter = signer1;
+      const value = await getMintValue(minter);
+      await mint(contracts.cryptoCocks, minter);
 
-    await assertCollectedBalance(
-      contracts.cryptoCocks,
-      value.mul(PERCENTAGE_TEAM).div(100),
-      "team"
-    );
+      await assertCollectedBalance(
+        contracts.cryptoCocks,
+        value.mul(PERCENTAGE_TEAM).div(100),
+        "team"
+      );
+    });
+
+    it("should collect 30% of sent ether for donation", async () => {
+      await assertCollectedBalance(
+        contracts.cryptoCocks,
+        BigNumber.from(0),
+        "team"
+      );
+
+      // mint
+      const minter = signer1;
+      const value = await getMintValue(minter);
+      await mint(contracts.cryptoCocks, minter);
+
+      await assertCollectedBalance(
+        contracts.cryptoCocks,
+        value.mul(PERCENTAGE_DONATION).div(100),
+        "donation"
+      );
+    });
   });
 
-  it("should collect 30% of sent ether for donation", async () => {
-    await assertCollectedBalance(
-      contracts.cryptoCocks,
-      BigNumber.from(0),
-      "team"
-    );
-
-    // mint
-    const minter = signer1;
-    const value = await getMintValue(minter);
-    await mint(contracts.cryptoCocks, minter);
-
-    await assertCollectedBalance(
-      contracts.cryptoCocks,
-      value.mul(PERCENTAGE_DONATION).div(100),
-      "donation"
-    );
-  });
-
-  describe("Community Royalty", function () {
+  describe("Community Royalties", function () {
     const percRoyal = 10; // community wallet will receive 10% of sent value when minting
     const maxSupply = 2;
     const minBalance = 100;

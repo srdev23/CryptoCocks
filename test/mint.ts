@@ -51,7 +51,7 @@ describe("Mint", function () {
       await mintRevert(contracts.cryptoCocks, signer1);
     });
 
-    it("should not be possible to execute initial mint by non-owner", async () => {
+    it("should be possible to execute initial mint by owner only", async () => {
       await expect(contracts.cryptoCocks.connect(nonOwner).initMint()).to.be
         .reverted;
     });
@@ -95,7 +95,7 @@ describe("Mint", function () {
       });
     });
 
-    it("should be possible to execute initial mint by owner only", async () => {
+    it("should be possible to execute initial mint", async () => {
       const mintTx = await contracts.cryptoCocks.connect(owner).initMint();
       await mintTx.wait();
       const lengths = [
@@ -228,10 +228,6 @@ describe("Mint", function () {
         const contract1 = await contracts.cryptoCocks.list(0);
         expect(contract1.tracker).to.equal(0);
       });
-
-      xit("should set the whitelisted contract balance correctly", async () => {
-        // expect(contract.balance).to.equal(feesWhiteListed);
-      });
     });
   });
 
@@ -258,9 +254,8 @@ describe("Mint", function () {
       await setContractToFreeSale(contracts.cryptoCocks, owner);
     });
 
-    it("should be possible to mint", async () => {
+    it("should be possible to mint with zero ether value", async () => {
       await mint(contracts.cryptoCocks, signer1, 0);
-      // TODO MF: Assert how much balance was removed from minter's wallet
     });
 
     it("should not remove ether from the minter's wallet", async () => {
