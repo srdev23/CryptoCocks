@@ -80,14 +80,10 @@ describe("Transfers", function () {
     );
   });
 
-  xit("should not be possible to withdraw balance for non-whitelisted wallets", async () => {
-    expect(1).to.equal(0);
-  });
-
   describe("Community Royalty", function () {
     const percRoyal = 10; // community wallet will receive 10% of sent value when minting
     const maxSupply = 2;
-    const minBalance = 100; // TODO MF: addWhitelistedContract should have defaults
+    const minBalance = 100;
     let communityWallet: SignerWithAddress;
     let nonCommunityWallet: SignerWithAddress;
     let communityToken: TestToken;
@@ -172,32 +168,4 @@ describe("Transfers", function () {
       }
     }
   });
-
-  //   it("should not be possible to withdraw balance for non-whitelisted wallets", async () => {
-  //     const nonCommunityWallets = signers;
-  //     nonCommunityWallets.push(
-  //       accounts.owner,
-  //       accounts.freeSigner,
-  //       accounts.signerTokenOneBelow,
-  //       accounts.signerTokenOneAbove1,
-  //       accounts.signerTokenOneAbove2,
-  //       accounts.signerTokenOneAbove3,
-  //       accounts.signerTokenTwoBelow,
-  //       accounts.signerTokenTwoAbove,
-  //       accounts.signerTokenBothAbove
-  //     );
-  //
-  //     for (let i = 0; i < nonCommunityWallets.length; i++) {
-  //       const prevBalance = await nonCommunityWallets[i].getBalance();
-  //       const transferTx = await contracts.cryptoCocks
-  //         .connect(nonCommunityWallets[i])
-  //         .transferRoyalty();
-  //       const receipt = await transferTx.wait();
-  //       const gasCost = receipt.cumulativeGasUsed.mul(receipt.effectiveGasPrice);
-  //       const newBalance = await nonCommunityWallets[i].getBalance();
-  //       // No change other than gas costs expected for the wallet balance
-  //       expect(prevBalance.sub(gasCost)).to.equal(newBalance);
-  //     }
-  //   });
-  //
 });

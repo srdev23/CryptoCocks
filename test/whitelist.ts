@@ -53,52 +53,24 @@ describe("Whitelist", function () {
       minBalance,
       percRoyal
     );
-
-    const whiteListed = await contracts.cryptoCocks.list(0);
-
-    expect(whiteListed.percRoyal).to.equal(percRoyal);
-    expect(whiteListed.maxSupply).to.equal(maxSupply);
-    expect(whiteListed.minBalance).to.equal(minBalance);
-    expect(whiteListed.tracker).to.equal(0);
-    expect(whiteListed.balance.toNumber()).to.equal(0);
-    expect(whiteListed.cc).to.equal(testToken.address);
-    expect(whiteListed.wallet).to.equal(communityWallet.address);
   });
-  //
-  // it("should be possible to add a whitelisted contract by owner only", async () => {
-  //   const cc = contracts.testTokenOne.address;
-  //   const wallet = accounts.communityWallet1.address;
-  //   const maxSupply = 2;
-  //   const minBalance = 100;
-  //   const percRoyal = 10;
-  //
-  //   await expect(
-  //     contracts.cryptoCocks
-  //       .connect(accounts.owner)
-  //       .addWhiteListing(cc, wallet, maxSupply, minBalance, percRoyal)
-  //   ).to.not.be.reverted;
-  //
-  //   const whiteListed = await contracts.cryptoCocks.list(0);
-  //
-  //   expect(whiteListed.percRoyal).to.equal(percRoyal);
-  //   expect(whiteListed.maxSupply).to.equal(maxSupply);
-  //   expect(whiteListed.minBalance).to.equal(minBalance);
-  //   expect(whiteListed.tracker).to.equal(0);
-  //   expect(whiteListed.balance.toNumber()).to.equal(0);
-  //   expect(whiteListed.cc).to.equal(cc);
-  //   expect(whiteListed.wallet).to.equal(wallet);
-  //
-  //   await expect(
-  //     contracts.cryptoCocks
-  //       .connect(accounts.nonOwner)
-  //       .addWhiteListing(cc, wallet, maxSupply, minBalance, percRoyal)
-  //   ).to.be.reverted;
-  //
-  //   // Check if numContracts was increased
-  //   const settings = await contracts.cryptoCocks.set();
-  //   expect(settings.numContracts).to.equal(1);
-  // });
-  //
+
+  it("should be possible to add a whitelisted contract by owner only", async () => {
+    const percRoyal = 10;
+    const maxSupply = 2;
+    const minBalance = 100;
+    const communityWallet = signer1;
+    const testToken = contracts.testTokenOne;
+    const cc = testToken.address;
+    const wallet = communityWallet.address;
+
+    await expect(
+      contracts.cryptoCocks
+        .connect(nonOwner)
+        .addWhiteListing(cc, wallet, maxSupply, minBalance, percRoyal)
+    ).to.be.reverted;
+  });
+
   // it("should be possible to add a white listing contracts up to total 20% royalty fee", async () => {
   //   // Add additional 10% fee contract with contracts.testTokenTwo
   //   const cc = contracts.testTokenTwo.address;
