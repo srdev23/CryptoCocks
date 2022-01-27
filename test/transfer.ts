@@ -74,7 +74,7 @@ describe("Transfers", function () {
 
     await assertCollectedBalance(
       contracts.cryptoCocks,
-      value.div(100).mul(PERCENTAGE_DONATION),
+      value.mul(PERCENTAGE_DONATION).div(100),
       "donation"
     );
   });

@@ -118,7 +118,7 @@ contract CryptoCocks is ERC721("CryptoCocks", "CC"), ERC721Enumerable, ERC721URI
          * Store fees in tracker variable
          */
         bal.team += SafeCast.toUint128(msg.value / 2); // 50% to team
-        bal.donation += SafeCast.toUint128((msg.value / 100) * 30); // 30% donated
+        bal.donation += SafeCast.toUint128((msg.value * 30) / 100); // 30% donated
 
         /**
          * Deposit royalty fee in each community wallet
