@@ -141,7 +141,12 @@ describe("Transfers", function () {
       );
     });
 
-    it("should not be possible to withdraw community royalty by non community wallet", async () => {});
+    it("should not be possible to withdraw community royalty by non community wallet", async () => {
+      // transfer royalty from contract to community wallet
+      await expect(
+        contracts.cryptoCocks.connect(nonCommunityWallet).transferRoyalty()
+      ).to.be.revertedWith("NO_COMMUNITY_WALLET");
+    });
   });
 
   it("should transfer fees with every 50th mint", async () => {
