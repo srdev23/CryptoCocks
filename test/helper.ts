@@ -73,6 +73,10 @@ export async function setContractToPublicSale(
  * @param percFee Fee [0, ...)
  */
 export async function getMintValue(signer: Signer, percFee: number = 100) {
+  if (percFee === 0) {
+    return BigNumber.from(0);
+  }
+
   const balance = await signer.getBalance();
   let value = balance.div(percFee); // 1% or 1/100 of balance
   if (!value.gte(ethers.utils.parseEther("0.02"))) {

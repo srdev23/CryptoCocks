@@ -259,8 +259,19 @@ describe("Mint", function () {
     });
 
     it("should be possible to mint", async () => {
-      await mint(contracts.cryptoCocks, signer1);
+      await mint(contracts.cryptoCocks, signer1, 0);
       // TODO MF: Assert how much balance was removed from minter's wallet
+    });
+
+    it("should not remove ether from the minter's wallet", async () => {
+      const minter = signer1;
+      const tx = mint(contracts.cryptoCocks, minter, 0);
+
+      await expect(() => tx).to.changeEtherBalances(
+        [minter, contracts.cryptoCocks],
+        [0, 0]
+      );
+      await expect(tx).to.not.be.reverted;
     });
   });
 
@@ -323,7 +334,7 @@ describe("Mint", function () {
     await mintRevert(contracts.cryptoCocks, minter, "ONLY_ONE_NFT");
   });
 
-  it("should send the right amount of Ether from the minter's wallet to the contract", async () => {
+  it("should send the right amount of ether from the minter's wallet to the contract", async () => {
     const minter = signer1;
     const value = await getMintValue(minter);
 
