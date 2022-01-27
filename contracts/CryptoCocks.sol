@@ -4,6 +4,7 @@ pragma solidity 0.8.7;
 import "@openzeppelin/contracts/token/ERC721/ERC721.sol";
 import "@openzeppelin/contracts/token/ERC721/extensions/ERC721Enumerable.sol";
 import "@openzeppelin/contracts/token/ERC721/extensions/ERC721URIStorage.sol";
+import "@openzeppelin/contracts/utils/Address.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/utils/Counters.sol";
 import "@openzeppelin/contracts/utils/Strings.sol";
@@ -117,15 +118,13 @@ contract CryptoCocks is ERC721("CryptoCocks", "CC"), ERC721Enumerable, ERC721URI
         /**
          * Store fees in tracker variable
          */
-        bal.team += SafeCast.toUint128(fee / 2);
-        // slither-disable-next-line divide-before-multiply
-        bal.donation += SafeCast.toUint128((fee * 30) / 100);
-
+        bal.team += SafeCast.toUint128(msg.value / 2); // 50% to team
+        bal.donation += SafeCast.toUint128((msg.value / 100) * 30); // 30% donated
 
         /**
          * Deposit royalty fee in each community wallet
          */
-        _depositRoyaltyFee(fee);
+        _depositRoyaltyFee(msg.value); // 20% to communities
 
         /**
          * Increase supply tracker of whitelisted contract, if applicable.
@@ -138,18 +137,13 @@ contract CryptoCocks is ERC721("CryptoCocks", "CC"), ERC721Enumerable, ERC721URI
          * Execute fee transactions every 50th NFT.
          */
         if (newTokenId % 50 == 0) {
+            console.log("TRANSFER");
             uint teamAmount = bal.team;
             uint donationAmount = bal.donation;
             bal.team = 0;
             bal.donation = 0;
-            if (!payable(teamWallet).send(teamAmount)) {
-                // slither-disable-next-line reentrancy-unlimited-gas
-                bal.team = uint128(teamAmount);
-            }
-            if (!payable(donationWallet).send(donationAmount)) {
-                // slither-disable-next-line reentrancy-unlimited-gas
-                bal.team = uint128(donationAmount);
-            }
+            Address.sendValue(payable(teamWallet), teamAmount);
+            Address.sendValue(payable(donationWallet), donationAmount);
         }
     }
 

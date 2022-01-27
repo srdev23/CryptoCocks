@@ -1,20 +1,79 @@
 import { expect } from "chai";
-import { ethers } from "hardhat";
+import { ethers, waffle } from "hardhat";
 // eslint-disable-next-line node/no-missing-import
 import { Contracts, deploy } from "./deploy";
 import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
+import {
+  assertCollectedBalance,
+  getMinter,
+  getMintValue,
+  mint,
+  // eslint-disable-next-line node/no-missing-import
+} from "./helper";
+import { BigNumber, Signer } from "ethers";
 
-describe("Transfers", function () {
+const PERCENTAGE_TEAM = 50;
+const PERCENTAGE_DONATION = 30;
+const PERCENTAGE_COMMUNITIES = 20;
+
+const TEAM_WALLET = "0xb1eE86786875E110A5c1Ab8cB6BA2ad21994E60e";
+const DONATION_WALLET = "0x1ea471c91Ad6cbCFa007FBd6A605522519f9FD64";
+
+describe.only("Transfers", function () {
   let contracts: Contracts;
   let owner: SignerWithAddress;
+  let signer1: SignerWithAddress;
+  let minters: SignerWithAddress[];
+  let team: Signer;
+  let donation: Signer;
 
   beforeEach(async () => {
-    [owner] = await ethers.getSigners();
+    [owner, signer1, , , , ...minters] = await ethers.getSigners();
     contracts = await deploy(owner);
+    const provider = waffle.provider;
+    team = provider.getSigner(TEAM_WALLET);
+    donation = provider.getSigner(DONATION_WALLET);
+  });
+
+  it("should collect 50% of sent ether for the team", async () => {
+    await assertCollectedBalance(
+      contracts.cryptoCocks,
+      BigNumber.from(0),
+      "team"
+    );
+
+    // mint
+    const minter = signer1;
+    const value = await getMintValue(minter);
+    await mint(contracts.cryptoCocks, minter);
+
+    await assertCollectedBalance(
+      contracts.cryptoCocks,
+      value.div(100).mul(PERCENTAGE_TEAM),
+      "team"
+    );
+  });
+
+  it("should collect 30% of sent ether for donation", async () => {
+    await assertCollectedBalance(
+      contracts.cryptoCocks,
+      BigNumber.from(0),
+      "team"
+    );
+
+    // mint
+    const minter = signer1;
+    const value = await getMintValue(minter);
+    await mint(contracts.cryptoCocks, minter);
+
+    await assertCollectedBalance(
+      contracts.cryptoCocks,
+      value.div(100).mul(PERCENTAGE_DONATION),
+      "donation"
+    );
   });
 
   xit("should not be possible to withdraw balance for non-whitelisted wallets", async () => {
-    // TODO MF
     expect(1).to.equal(0);
   });
 
@@ -22,26 +81,29 @@ describe("Transfers", function () {
     expect(1).to.equal(0);
   });
 
-  xit("should transfer fees with every 50th mint", async () => {
-    expect(1).to.equal(0);
-    // const TEAM_WALLET = "0xb1eE86786875E110A5c1Ab8cB6BA2ad21994E60e";
-    // const DONATION_WALLET = "0x1ea471c91Ad6cbCFa007FBd6A605522519f9FD64";
+  it("should transfer fees with every 50th mint", async () => {
+    expect(await team.getBalance()).to.equal(BigNumber.from(0));
 
-    // if (parseInt(tokenId) % 50 === 0) {
-    //   const provider = waffle.provider;
-    //   totalFees = totalFees.add(batchFees);
-    //
-    //   expect(await provider.getBalance(TEAM_WALLET)).to.closeTo(
-    //     totalFees.div(2),
-    //     100
-    //   );
-    //   expect(await provider.getBalance(DONATION_WALLET)).to.closeTo(
-    //     totalFees.div(10).mul(3),
-    //     100
-    //   );
-    //   // reset batchFees for next 50 mints
-    //   batchFees = BigNumber.from("0");
-    // }
+    let valueSum = BigNumber.from(0);
+    for (let i = 0; i < 100; i++) {
+      const minter = await getMinter(minters, 3, i);
+      const value = await getMintValue(minter);
+      valueSum = valueSum.add(value);
+      const tx = mint(contracts.cryptoCocks, minter);
+
+      // note: token id counter begins with 1
+      if ((i + 1) % 50 === 0) {
+        await expect(() => tx).to.changeEtherBalance(
+          team,
+          valueSum.div(100).mul(PERCENTAGE_TEAM)
+        );
+        await expect(() => tx).to.changeEtherBalance(
+          donation,
+          valueSum.div(100).mul(PERCENTAGE_DONATION)
+        );
+        valueSum = BigNumber.from(0);
+      }
+    }
   });
 
   //   it("should not be possible to withdraw balance for non-whitelisted wallets", async () => {
