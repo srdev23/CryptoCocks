@@ -4,6 +4,8 @@ import { expect } from "chai";
 import { ethers } from "hardhat";
 import { BigNumber, ContractTransaction, Signer } from "ethers";
 import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
+import { MAXIMUM } from "../accounts";
+import { PercentileDataEntry } from "./percentiles";
 
 /**
  * Sets contract to free sale settings
@@ -198,6 +200,20 @@ export interface FeeSettings {
   minFee?: number;
 }
 
+export async function getMinter(
+  minters: SignerWithAddress[],
+  chunk: number,
+  index: number,
+  percentileData: PercentileDataEntry[]
+): Promise<SignerWithAddress> {
+  const minter = minters[chunk * 100 + index];
+  const balance = await minter.getBalance();
+  expect(balance).to.equal(
+    ethers.utils.parseEther(percentileData[index].balance)
+  );
+  return minter;
+}
+
 export async function changeFeeSettings(
   cryptoCocks: CryptoCocks,
   owner: Signer,
@@ -205,16 +221,16 @@ export async function changeFeeSettings(
 ) {
   const minFee = feeSettings.minFee ?? 0.02;
   const percFee = feeSettings.percFee ?? 100;
-  return cryptoCocks
-    .connect(owner)
-    .changeFeeSettings(false, 100, ethers.utils.parseEther("0.02"));
-  // await expect(
-  //   cryptoCocks
-  //     .connect(owner)
-  //     .changeFeeSettings(
-  //       feeSettings.freeMinting ?? false,
-  //       percFee,
-  //       ethers.utils.parseEther(minFee.toString())
-  //     )
-  // ).to.not.be.reverted;
+  // return cryptoCocks
+  //   .connect(owner)
+  //   .changeFeeSettings(false, 100, ethers.utils.parseEther("0.02"));
+  await expect(
+    cryptoCocks
+      .connect(owner)
+      .changeFeeSettings(
+        feeSettings.freeMinting ?? false,
+        percFee,
+        ethers.utils.parseEther(minFee.toString())
+      )
+  ).to.not.be.reverted;
 }

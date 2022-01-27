@@ -7,12 +7,9 @@ import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
 describe("Transfers", function () {
   let contracts: Contracts;
   let owner: SignerWithAddress;
-  let nonOwner: SignerWithAddress;
-  let minters: SignerWithAddress[];
 
   beforeEach(async () => {
-    [owner, ...minters] = await ethers.getSigners();
-    nonOwner = minters[0];
+    [owner] = await ethers.getSigners();
     contracts = await deploy(owner);
   });
 

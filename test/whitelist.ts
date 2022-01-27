@@ -21,14 +21,17 @@ import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
 
 describe("Whitelist", function () {
   let contracts: Contracts;
-  let owner: SignerWithAddress;
-  let nonOwner: SignerWithAddress;
-  let minters: SignerWithAddress[];
+  let owner: SignerWithAddress,
+    nonOwner: SignerWithAddress,
+    signer1: SignerWithAddress,
+    signer2: SignerWithAddress,
+    signer3: SignerWithAddress,
+    signer4: SignerWithAddress;
   // let percentileData: PercentileDataEntry[];
 
   beforeEach(async () => {
-    [owner, ...minters] = await ethers.getSigners();
-    nonOwner = minters[0];
+    [owner, signer1, signer2, signer3, signer4] = await ethers.getSigners();
+    nonOwner = signer1;
     contracts = await deploy(owner);
     // percentileData = await loadPercentileData();
     // await mintTestContractTokens(contracts, accounts, percentileData);
@@ -38,7 +41,7 @@ describe("Whitelist", function () {
     const percRoyal = 10;
     const maxSupply = 2;
     const minBalance = 100;
-    const communityWallet = minters[0];
+    const communityWallet = signer1;
     const testToken = contracts.testTokenOne;
 
     await addWhitelistedContract(

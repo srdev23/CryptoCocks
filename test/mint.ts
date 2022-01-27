@@ -13,6 +13,7 @@ import {
   setContractToPublicSale,
   mintRevert,
   changeFeeSettings,
+  getMinter,
   // eslint-disable-next-line node/no-missing-import
 } from "./helper";
 import { BigNumber } from "ethers";
@@ -25,13 +26,18 @@ const INIT_MINT_COUNT = 30;
 describe("Mint", function () {
   let contracts: Contracts;
   let owner: SignerWithAddress;
+  let signer1: SignerWithAddress,
+    signer2: SignerWithAddress,
+    signer3: SignerWithAddress,
+    signer4: SignerWithAddress;
   let nonOwner: SignerWithAddress;
   let minters: SignerWithAddress[];
   let percentileData: PercentileDataEntry[];
 
   beforeEach(async () => {
-    [owner, ...minters] = await ethers.getSigners();
-    nonOwner = minters[0];
+    [owner, signer1, signer2, signer3, signer4, ...minters] =
+      await ethers.getSigners();
+    nonOwner = signer1;
     contracts = await deploy(owner);
     percentileData = await loadPercentileData();
   });
@@ -42,8 +48,7 @@ describe("Mint", function () {
     });
 
     it("should not be possible to mint publicly", async () => {
-      const minter = minters[0];
-      await mintRevert(contracts.cryptoCocks, minter);
+      await mintRevert(contracts.cryptoCocks, signer1);
     });
 
     it("should not be possible to execute initial mint by non-owner", async () => {
@@ -60,7 +65,7 @@ describe("Mint", function () {
           contracts.cryptoCocks,
           owner,
           contracts.testTokenOne,
-          minters[0],
+          signer1,
           maxSupply,
           minBalance,
           10
@@ -68,24 +73,21 @@ describe("Mint", function () {
       });
 
       it("should not be possible to mint if the maximum supply of a whitelisted token is reached", async () => {
-        const signer1 = minters[1];
-        const signer2 = minters[2];
-
-        await mintTestToken(
-          signer1,
-          contracts.cryptoCocks,
-          contracts.testTokenOne,
-          minBalance // enough balance to be permitted to mint
-        );
         await mintTestToken(
           signer2,
           contracts.cryptoCocks,
           contracts.testTokenOne,
           minBalance // enough balance to be permitted to mint
         );
+        await mintTestToken(
+          signer3,
+          contracts.cryptoCocks,
+          contracts.testTokenOne,
+          minBalance // enough balance to be permitted to mint
+        );
 
-        await mint(contracts.cryptoCocks, signer1);
-        await mintRevert(contracts.cryptoCocks, signer2);
+        await mint(contracts.cryptoCocks, signer2);
+        await mintRevert(contracts.cryptoCocks, signer3);
 
         // tracks the number of minted tokens for TestTokenOne
         const contract = await contracts.cryptoCocks.list(0);
@@ -134,7 +136,7 @@ describe("Mint", function () {
           contracts.cryptoCocks,
           owner,
           contracts.testTokenOne,
-          minters[0],
+          signer1,
           2,
           minBalanceTokenOne,
           10
@@ -144,7 +146,7 @@ describe("Mint", function () {
           contracts.cryptoCocks,
           owner,
           contracts.testTokenTwo,
-          minters[1],
+          signer2,
           2,
           minBalanceTokenTwo,
           10
@@ -157,7 +159,7 @@ describe("Mint", function () {
           otherSignerTokenOne,
           signerTokenTwo,
           signerTokenBoth,
-        ] = minters.slice(3, 7);
+        ] = [signer1, signer2, signer3, signer4];
 
         await mintTestToken(
           signerTokenOne,
@@ -213,16 +215,14 @@ describe("Mint", function () {
       });
 
       it("should not be possible to mint for holder without enough balance of a whitelisted token", async () => {
-        const signer = minters[2];
-
         await mintTestToken(
-          signer,
+          signer3,
           contracts.cryptoCocks,
           contracts.testTokenOne,
           minBalanceTokenOne - 1 // not enough balance of the whitelisted token
         );
 
-        await mintRevert(contracts.cryptoCocks, signer);
+        await mintRevert(contracts.cryptoCocks, signer3);
 
         // tracks the number of minted tokens for TestTokenOne
         const contract1 = await contracts.cryptoCocks.list(0);
@@ -241,11 +241,11 @@ describe("Mint", function () {
     });
 
     it("should be possible to mint", async () => {
-      await mint(contracts.cryptoCocks, minters[0]);
+      await mint(contracts.cryptoCocks, signer1);
     });
 
     it("should revert when mint value is less than minimum fee", async () => {
-      const mintTx = contracts.cryptoCocks.connect(minters[0]).mint({
+      const mintTx = contracts.cryptoCocks.connect(signer1).mint({
         value: ethers.utils.parseEther("0.019"), // 0.02 ether needed
       });
 
@@ -259,42 +259,16 @@ describe("Mint", function () {
     });
 
     it("should be possible to mint", async () => {
-      await mint(contracts.cryptoCocks, minters[0]);
+      await mint(contracts.cryptoCocks, signer1);
       // TODO MF: Assert how much balance was removed from minter's wallet
     });
   });
 
   describe("Length Calculation", function () {
     it("should calculate lengths correctly for fixed fee", async () => {
-      const pTransactions = [...Array(100)].map(async (_, index) => {
-        return mint(contracts.cryptoCocks, minters[index]);
-      });
-
-      const transactions = await Promise.all(pTransactions);
-      for (const tx of transactions) {
-        const index = transactions.indexOf(tx);
-        const tokenId = index + 1; // starts with 1, not 0
-        await expectToken(
-          contracts.cryptoCocks,
-          tx,
-          percentileData[index].length_new,
-          tokenId
-        );
-      }
-    }).timeout(0);
-
-    it("should calculate lengths correctly for variable fees", async () => {
       for (let i = 0; i < 100; i++) {
-        if (i === 0) {
-          // const changeTx = changeFeeSettings(contracts.cryptoCocks, owner, {
-          //   percFee: 100,
-          // });
-          // await changeTx;
-          console.log("Changed fee");
-        }
-
-        console.log("mint");
-        const tx = await mint(contracts.cryptoCocks, minters[i]);
+        const minter = await getMinter(minters, 0, i, percentileData);
+        const tx = await mint(contracts.cryptoCocks, minter);
 
         await expectToken(
           contracts.cryptoCocks,
@@ -304,68 +278,53 @@ describe("Mint", function () {
         );
       }
     }).timeout(0);
-  });
 
-  xit("should calculate lengths correctly for variable fees", async () => {
-    const percFee = 100;
-    const pTransactions = [...Array(100)].map(async (_, index) => {
-      if (index === 0) {
-        console.log("change fee");
-        // percFee = 90;
-        const change = await changeFeeSettings(contracts.cryptoCocks, owner, {
-          percFee,
-        });
-        await change.wait();
+    it("should calculate lengths correctly for variable fee", async () => {
+      let percFee = 50;
+      for (let i = 0; i < 100; i++) {
+        if (i % 20 === 0) {
+          percFee += 10;
+          await changeFeeSettings(contracts.cryptoCocks, owner, {
+            percFee,
+          });
+        }
+
+        const minter = await getMinter(minters, 1, i, percentileData);
+        const tx = await mint(contracts.cryptoCocks, minter, percFee);
+
+        await expectToken(
+          contracts.cryptoCocks,
+          await tx,
+          percentileData[i].length_new,
+          i + 1
+        );
       }
+    }).timeout(0);
 
-      console.log("mint");
-      const tx = mint(contracts.cryptoCocks, minters[index], percFee);
-      await expectToken(
-        contracts.cryptoCocks,
-        await tx,
-        percentileData[index].length_new,
-        index + 1
-      );
-      await (await tx).wait();
-    });
+    it("should set the token URI correctly", async () => {
+      for (let i = 0; i < 100; i++) {
+        const minter = await getMinter(minters, 2, i, percentileData);
+        await mint(contracts.cryptoCocks, minter);
 
-    await Promise.all(pTransactions);
-    // for (const tx of transactions) {
-    //   const index = transactions.indexOf(tx);
-    //   const tokenId = index + 1; // starts with 1, not 0
-    //   await expectToken(
-    //     contracts.cryptoCocks,
-    //     tx,
-    //     percentileData[index].length_new,
-    //     tokenId
-    //   );
-    // }
-  }).timeout(0);
-
-  xit("should set the token URI correctly", async () => {
-    for (let i = 0; i < 100; i++) {
-      // const signer = signers[i];
-      // const mintTx = mintOld(contracts.cryptoCocks, signer);
-      // await expect(mintTx).to.not.be.reverted;
-
-      const tokenId = i + 1;
-      const tokenUri = await contracts.cryptoCocks.tokenURI(tokenId);
-      expect(tokenUri).to.equal(
-        `ifps://bafybeicftqysvuqz2aa4ivf3af3usqwt435h6iae7nhompakqy2uh5drye/${
-          percentileData[tokenId - 1].length_new
-        }/${tokenId}/metadata.json`
-      );
-    }
+        const tokenId = i + 1;
+        const tokenUri = await contracts.cryptoCocks.tokenURI(tokenId);
+        expect(tokenUri).to.equal(
+          `ifps://bafybeicftqysvuqz2aa4ivf3af3usqwt435h6iae7nhompakqy2uh5drye/${
+            percentileData[tokenId - 1].length_new
+          }/${tokenId}/metadata.json`
+        );
+      }
+    }).timeout(0);
   });
 
   it("should not be possible to mint more than one token", async () => {
-    const minter = minters[0];
+    const minter = signer1;
     await mint(contracts.cryptoCocks, minter);
     await mintRevert(contracts.cryptoCocks, minter, "ONLY_ONE_NFT");
   });
 
   it("should send the right amount of Ether from the minter's wallet to the contract", async () => {
-    const minter = minters[1];
+    const minter = signer1;
     const value = await getMintValue(minter);
 
     const tx = contracts.cryptoCocks.connect(minter).mint({
@@ -382,7 +341,7 @@ describe("Mint", function () {
   });
 
   it("should not be possible to send a value less than required", async () => {
-    const minter = minters[0];
+    const minter = signer1;
     const balance = await minter.getBalance();
     const value = await getMintValue(minter);
 

@@ -14,24 +14,70 @@ const MNEMONIC =
   "hollow cycle obscure tumble office alarm slam fragile online peace wink together";
 const HD_PATH = "m/44'/60'/0'/0/";
 
+export const NUM_CHUNKS = 3;
+export const MAXIMUM = 100;
+
 loadPercentileData().then((data: PercentileDataEntry[]) => {
-  const accounts = data.map((entry: PercentileDataEntry, index) => {
-    const account: HardhatNetworkAccountUserConfig = {
-      balance: utils.parseEther(entry.balance).toString(),
-      privateKey: bufferToHex(
-        deriveKeyFromMnemonicAndPath(MNEMONIC, `${HD_PATH}${index + 1}`)!
-      ),
-    };
-    return account;
-  });
+  let chunks: HardhatNetworkAccountUserConfig[] = [];
+  let counter = 5;
+  for (let i = 0; i < NUM_CHUNKS; i++) {
+    const chunk = [];
+    for (let j = 0; j < MAXIMUM; j++) {
+      const account: HardhatNetworkAccountUserConfig = {
+        balance: utils.parseEther(data[j].balance).toString(),
+        privateKey: bufferToHex(
+          deriveKeyFromMnemonicAndPath(MNEMONIC, `${HD_PATH}${counter}`)!
+        ),
+      };
+      chunk.push(account);
+      counter++;
+    }
+    chunks = chunks.concat(chunk);
+  }
+
+  let accounts = [];
 
   // add owner
-  accounts.unshift({
+  accounts.push({
     balance: utils.parseEther("100").toString(),
     privateKey: bufferToHex(
       deriveKeyFromMnemonicAndPath(MNEMONIC, HD_PATH + "0")!
     ),
   });
+
+  // add signer 1
+  accounts.push({
+    balance: utils.parseEther("100").toString(),
+    privateKey: bufferToHex(
+      deriveKeyFromMnemonicAndPath(MNEMONIC, HD_PATH + "1")!
+    ),
+  });
+
+  // add signer 2
+  accounts.push({
+    balance: utils.parseEther("100").toString(),
+    privateKey: bufferToHex(
+      deriveKeyFromMnemonicAndPath(MNEMONIC, HD_PATH + "2")!
+    ),
+  });
+
+  // add signer 3
+  accounts.push({
+    balance: utils.parseEther("100").toString(),
+    privateKey: bufferToHex(
+      deriveKeyFromMnemonicAndPath(MNEMONIC, HD_PATH + "3")!
+    ),
+  });
+
+  // add signer 4
+  accounts.push({
+    balance: utils.parseEther("100").toString(),
+    privateKey: bufferToHex(
+      deriveKeyFromMnemonicAndPath(MNEMONIC, HD_PATH + "4")!
+    ),
+  });
+
+  accounts = accounts.concat(chunks);
 
   fs.writeFileSync("accounts.json", JSON.stringify(accounts));
 });
