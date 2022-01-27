@@ -13,11 +13,12 @@ import {
   // eslint-disable-next-line node/no-missing-import
 } from "./helper";
 import { BigNumber, Signer } from "ethers";
+// eslint-disable-next-line node/no-missing-import
 import { TestToken } from "../typechain";
 
 const PERCENTAGE_TEAM = 50;
 const PERCENTAGE_DONATION = 30;
-const PERCENTAGE_COMMUNITIES = 20;
+// const PERCENTAGE_COMMUNITIES = 20;
 
 const TEAM_WALLET = "0xb1eE86786875E110A5c1Ab8cB6BA2ad21994E60e";
 const DONATION_WALLET = "0x1ea471c91Ad6cbCFa007FBd6A605522519f9FD64";
