@@ -351,14 +351,8 @@ describe("Mint", function () {
     const balance = await minter.getBalance();
     const value = await getMintValue(minter);
 
-    const estimation = await contracts.cryptoCocks
-      .connect(minter)
-      .estimateGas.mint({
-        value,
-      });
-
     const tx = contracts.cryptoCocks.connect(minter).mint({
-      value: value.sub(estimation).sub(balance.div(1000)),
+      value: value.sub(balance.div(1000)),
     });
 
     await expect(tx).to.be.revertedWith("INSUFFICIENT_FUNDS");
