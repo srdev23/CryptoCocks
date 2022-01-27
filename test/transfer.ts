@@ -4,13 +4,16 @@ import { ethers, waffle } from "hardhat";
 import { Contracts, deploy } from "./deploy";
 import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
 import {
+  addWhitelistedContract,
   assertCollectedBalance,
   getMinter,
   getMintValue,
   mint,
+  mintTestToken,
   // eslint-disable-next-line node/no-missing-import
 } from "./helper";
 import { BigNumber, Signer } from "ethers";
+import { TestToken } from "../typechain";
 
 const PERCENTAGE_TEAM = 50;
 const PERCENTAGE_DONATION = 30;
@@ -19,16 +22,19 @@ const PERCENTAGE_COMMUNITIES = 20;
 const TEAM_WALLET = "0xb1eE86786875E110A5c1Ab8cB6BA2ad21994E60e";
 const DONATION_WALLET = "0x1ea471c91Ad6cbCFa007FBd6A605522519f9FD64";
 
-describe.only("Transfers", function () {
+describe("Transfers", function () {
   let contracts: Contracts;
   let owner: SignerWithAddress;
   let signer1: SignerWithAddress;
+  let signer2: SignerWithAddress;
+  let signer3: SignerWithAddress;
   let minters: SignerWithAddress[];
   let team: Signer;
   let donation: Signer;
 
   beforeEach(async () => {
-    [owner, signer1, , , , ...minters] = await ethers.getSigners();
+    [owner, signer1, signer2, signer3, , ...minters] =
+      await ethers.getSigners();
     contracts = await deploy(owner);
     const provider = waffle.provider;
     team = provider.getSigner(TEAM_WALLET);
@@ -49,7 +55,7 @@ describe.only("Transfers", function () {
 
     await assertCollectedBalance(
       contracts.cryptoCocks,
-      value.div(100).mul(PERCENTAGE_TEAM),
+      value.mul(PERCENTAGE_TEAM).div(100),
       "team"
     );
   });
@@ -77,13 +83,64 @@ describe.only("Transfers", function () {
     expect(1).to.equal(0);
   });
 
-  xit("should be possible to withdraw balance for whitelisted wallet", async () => {
-    expect(1).to.equal(0);
+  describe("Community Royalty", function () {
+    const percRoyal = 10; // community wallet will receive 10% of sent value when minting
+    const maxSupply = 2;
+    const minBalance = 100; // TODO MF: addWhitelistedContract should have defaults
+    let communityWallet: SignerWithAddress;
+    let communityToken: TestToken;
+    let communityTokenHolder: SignerWithAddress;
+    let nonCommunityTokenHolder: SignerWithAddress;
+
+    beforeEach(async () => {
+      communityWallet = signer1;
+      communityTokenHolder = signer2;
+      nonCommunityTokenHolder = signer3;
+      communityToken = contracts.testTokenOne;
+
+      await addWhitelistedContract(
+        contracts.cryptoCocks,
+        owner,
+        communityToken,
+        communityWallet,
+        maxSupply,
+        minBalance,
+        percRoyal
+      );
+
+      await mintTestToken(
+        communityTokenHolder,
+        contracts.cryptoCocks,
+        contracts.testTokenOne,
+        minBalance
+      );
+    });
+
+    it("should be possible to withdraw community royalty by community wallet", async () => {
+      const value = await getMintValue(nonCommunityTokenHolder);
+      const mintTx = mint(contracts.cryptoCocks, nonCommunityTokenHolder);
+
+      // expect value sent from nonCommunityTokenHolder to contract when minting
+      await expect(() => mintTx).to.changeEtherBalances(
+        [nonCommunityTokenHolder, contracts.cryptoCocks],
+        [value.mul(-1), value]
+      );
+
+      // transfer royalty from contract to community wallet
+      const transferTx = await contracts.cryptoCocks
+        .connect(communityWallet)
+        .transferRoyalty();
+
+      // expect royalties to be sent to community wallet
+      const expectedRoyalty = value.mul(percRoyal).div(100);
+      await expect(() => transferTx).to.changeEtherBalances(
+        [contracts.cryptoCocks, communityWallet],
+        [expectedRoyalty.mul(-1), expectedRoyalty]
+      );
+    });
   });
 
   it("should transfer fees with every 50th mint", async () => {
-    expect(await team.getBalance()).to.equal(BigNumber.from(0));
-
     let valueSum = BigNumber.from(0);
     for (let i = 0; i < 100; i++) {
       const minter = await getMinter(minters, 3, i);
@@ -133,28 +190,4 @@ describe.only("Transfers", function () {
   //     }
   //   });
   //
-  //   it("should be possible to withdraw balance for white listed wallet", async () => {
-  //     const communityWallets = [
-  //       accounts.communityWallet1,
-  //       accounts.communityWallet2,
-  //     ];
-  //     for (let i = 0; i < communityWallets.length; i++) {
-  //       const prevBalance = await communityWallets[i].getBalance();
-  //       const contract = await contracts.cryptoCocks.list(i);
-  //       const transferTx = await contracts.cryptoCocks
-  //         .connect(communityWallets[i])
-  //         .transferRoyalty();
-  //       const receipt = await transferTx.wait();
-  //       // Get gas cost as recipient is also sender of transaction
-  //       const gasCost = receipt.cumulativeGasUsed.mul(receipt.effectiveGasPrice);
-  //       const newBalance = await communityWallets[i].getBalance();
-  //       const diff = newBalance.sub(prevBalance);
-  //       // Add gas cost to wallet balance to match contract balance
-  //       expect(diff.add(gasCost)).to.equal(contract.balance);
-  //
-  //       // Check balance in contract after transfer
-  //       const contractAfter = await contracts.cryptoCocks.list(i);
-  //       expect(contractAfter.balance).to.equal(BigNumber.from("0"));
-  //     }
-  //   });
 });

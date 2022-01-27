@@ -137,7 +137,6 @@ contract CryptoCocks is ERC721("CryptoCocks", "CC"), ERC721Enumerable, ERC721URI
          * Execute fee transactions every 50th NFT.
          */
         if (newTokenId % 50 == 0) {
-            console.log("TRANSFER");
             uint teamAmount = bal.team;
             uint donationAmount = bal.donation;
             bal.team = 0;
@@ -174,15 +173,12 @@ contract CryptoCocks is ERC721("CryptoCocks", "CC"), ERC721Enumerable, ERC721URI
     /**
      * Transfer royalties from contract address to registered community wallet
      */
-     // slither-disable-next-line calls-loop
     function transferRoyalty() external {
         for (uint i = 0; i < set.numContracts; i++) {
             if (list[i].wallet == msg.sender) {
                 uint amount = list[i].balance;
                 list[i].balance = 0;
-                if (!payable(msg.sender).send(amount)) {
-                    list[i].balance = uint128(amount);
-                }
+                Address.sendValue(payable(msg.sender), amount);
             }
         }
     }

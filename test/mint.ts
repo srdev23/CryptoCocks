@@ -1,5 +1,5 @@
 import { expect } from "chai";
-import { ethers, network } from "hardhat";
+import { ethers } from "hardhat";
 // eslint-disable-next-line node/no-missing-import
 import { Contracts, deploy } from "./deploy";
 import {
