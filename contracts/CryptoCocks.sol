@@ -4,6 +4,7 @@ pragma solidity 0.8.7;
 import "@openzeppelin/contracts/token/ERC721/ERC721.sol";
 import "@openzeppelin/contracts/token/ERC721/extensions/ERC721Enumerable.sol";
 import "@openzeppelin/contracts/token/ERC721/extensions/ERC721URIStorage.sol";
+import "@openzeppelin/contracts/utils/Address.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/utils/Counters.sol";
 import "@openzeppelin/contracts/utils/Strings.sol";
@@ -57,7 +58,7 @@ contract CryptoCocks is ERC721("CryptoCocks", "CC"), ERC721Enumerable, ERC721URI
 
     Settings public set;
     Balances public bal;
-    mapping(uint => ListContract) public list; // contract mapping that are whitelisted
+    mapping(uint8 => ListContract) public list; // contract mapping that are whitelisted
 
     address payable public teamWallet;
     address payable public donationWallet;
@@ -84,7 +85,7 @@ contract CryptoCocks is ERC721("CryptoCocks", "CC"), ERC721Enumerable, ERC721URI
     virtual
     payable
     {
-        (bool wL, uint idx) = _checkListed(msg.sender);
+        (bool wL, uint8 idx) = _checkListed(msg.sender);
         uint16 newTokenId = uint16(_tokenIdTracker.current() + 1);
         uint userBalance = msg.sender.balance + msg.value;
 
@@ -92,37 +93,37 @@ contract CryptoCocks is ERC721("CryptoCocks", "CC"), ERC721Enumerable, ERC721URI
         require((set.publicSaleStatus || wL), "LOCK");
         require(newTokenId <= uint16(10000), "TOTAL_SUPPLY_REACHED");
         require(balanceOf(msg.sender) == 0, "ONLY_ONE_NFT");
-        uint fee = 0;
+
+        uint treeValue = userBalance;
         if (!set.freeMinting) {
-            // slither-disable-next-line divide-before-multiply
-            fee = (userBalance / set.percFee) < set.minFee ? set.minFee : (userBalance / set.percFee);
-            require(msg.value >= fee, "INSUFFICIENT_FUNDS");
+            require(msg.value >= ((userBalance / set.percFee) < set.minFee ? set.minFee : (userBalance / set.percFee)), "INSUFFICIENT_FUNDS");
+            treeValue = msg.value * set.percFee;
         }
 
         _safeMint(msg.sender, uint(newTokenId));
 
         // insert into tree
-        if (!tree.exists(userBalance)) {
-            tree.insert(newTokenId, userBalance);
+        if (!tree.exists(treeValue)) {
+            tree.insert(newTokenId, treeValue);
         }
 
-        console.log("Token %i with length %i", newTokenId, _getLength(userBalance));
+        // calculate length
+        uint sum = tree.count() - 1;
+        uint size = sum > 0 ? ((100 * (tree.rank(treeValue) - 1)) / sum) : 100;
 
         // create token URI
-        _createTokenURI(newTokenId, _getLength(userBalance));
+        _createTokenURI(newTokenId, SafeCast.toUint8(((size - (size % 10)) / 10) + 1));
 
         /**
          * Store fees in tracker variable
          */
-        bal.team += SafeCast.toUint128(fee / 2);
-        // slither-disable-next-line divide-before-multiply
-        bal.donation += SafeCast.toUint128((fee * 30) / 100);
-
+        bal.team += SafeCast.toUint128(msg.value / 2); // 50% to team
+        bal.donation += SafeCast.toUint128((msg.value * 30) / 100); // 30% donated
 
         /**
          * Deposit royalty fee in each community wallet
          */
-        _depositRoyaltyFee(fee);
+        _depositRoyaltyFee(msg.value); // 20% to communities
 
         /**
          * Increase supply tracker of whitelisted contract, if applicable.
@@ -139,14 +140,8 @@ contract CryptoCocks is ERC721("CryptoCocks", "CC"), ERC721Enumerable, ERC721URI
             uint donationAmount = bal.donation;
             bal.team = 0;
             bal.donation = 0;
-            if (!payable(teamWallet).send(teamAmount)) {
-                // slither-disable-next-line reentrancy-unlimited-gas
-                bal.team = uint128(teamAmount);
-            }
-            if (!payable(donationWallet).send(donationAmount)) {
-                // slither-disable-next-line reentrancy-unlimited-gas
-                bal.team = uint128(donationAmount);
-            }
+            Address.sendValue(payable(teamWallet), teamAmount);
+            Address.sendValue(payable(donationWallet), donationAmount);
         }
     }
 
@@ -177,27 +172,30 @@ contract CryptoCocks is ERC721("CryptoCocks", "CC"), ERC721Enumerable, ERC721URI
     /**
      * Transfer royalties from contract address to registered community wallet
      */
-     // slither-disable-next-line calls-loop
     function transferRoyalty() external {
-        for (uint i = 0; i < set.numContracts; i++) {
+        bool isCommunityWallet = false;
+        uint8 idx = 0;
+        for (uint8 i = 0; i < set.numContracts; i++) {
             if (list[i].wallet == msg.sender) {
-                uint amount = list[i].balance;
-                list[i].balance = 0;
-                if (!payable(msg.sender).send(amount)) {
-                    list[i].balance = uint128(amount);
-                }
+                isCommunityWallet = true;
+                idx = i;
+                break;
             }
         }
+        require(isCommunityWallet, "NO_COMMUNITY_WALLET");
+        uint amount = list[idx].balance;
+        list[idx].balance = 0;
+        Address.sendValue(payable(msg.sender), amount);
     }
 
     /**
      * Changes fee settings of contract
      */
-    function changeFeeSettings(bool newStatus, uint8 newPercFee, uint128 newMinFee) external onlyOwner {
-        require(newStatus || newPercFee > 0, "DIVIDE_BY_ZERO");
-        set.freeMinting = newStatus; // true => minting does not require a fee
-        set.percFee = newPercFee; // percFee, denoted as denominator (i.e., 1/percFee)
-        set.minFee = newMinFee; // minFee, denoted in Wei
+    function changeFeeSettings(bool status, uint8 percFee, uint128 minFee) external onlyOwner {
+        require(status || percFee > 0, "DIVIDE_BY_ZERO");
+        set.freeMinting = status; // true => minting does not require a fee
+        set.percFee = percFee; // percFee, denoted as denominator (i.e., 1/percFee)
+        set.minFee = minFee; // minFee, denoted in Wei
     }
 
     /**
@@ -260,8 +258,8 @@ contract CryptoCocks is ERC721("CryptoCocks", "CC"), ERC721Enumerable, ERC721URI
      * Checking whether an account holds enough tokens from a whitelisted contract
      * and maxSupply in this contract is not reached yet.
      */
-    function _checkListed(address account) private view returns (bool, uint) {
-        for (uint i = 0; i < set.numContracts; i++) {
+    function _checkListed(address account) private view returns (bool, uint8) {
+        for (uint8 i = 0; i < set.numContracts; i++) {
             if ((queryBalance(list[i].cc, account) >= list[i].minBalance) && (list[i].maxSupply > list[i].tracker)) {
                 return (true, i);
             }
@@ -270,19 +268,10 @@ contract CryptoCocks is ERC721("CryptoCocks", "CC"), ERC721Enumerable, ERC721URI
     }
 
     /**
-     * Calculate the cock length from the userBalance
-     */
-    function _getLength(uint _userBalance) private view returns (uint8) {
-        uint sum = tree.count() - 1;
-        uint size = sum > 0 ? ((100 * (tree.rank(_userBalance) - 1)) / sum) : 100;
-        return SafeCast.toUint8(((size - (size % 10)) / 10) + 1);
-    }
-
-    /**
     * Deposit royalty fee in each community wallet
     */
     function _depositRoyaltyFee(uint _fee) private {
-        for (uint i = 0; (i < set.numContracts); i++) {
+        for (uint8 i = 0; (i < set.numContracts); i++) {
             list[i].balance += uint128((_fee * list[i].percRoyal) / 100);
         }
     }
