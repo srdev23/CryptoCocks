@@ -63,6 +63,8 @@ contract CryptoCocks is ERC721("CryptoCocks", "CC"), ERC721Enumerable, ERC721URI
     address payable public teamWallet;
     address payable public donationWallet;
 
+    uint8 minLength = 10;
+
     constructor() {
         set = Settings(true, false, 100, 20, 0, 0.02 ether);
         bal = Balances(0, 0);
@@ -111,8 +113,14 @@ contract CryptoCocks is ERC721("CryptoCocks", "CC"), ERC721Enumerable, ERC721URI
         uint sum = tree.count() - 1;
         uint size = sum > 0 ? ((100 * (tree.rank(treeValue) - 1)) / sum) : 100;
 
+        uint8 length = uint8(((size - (size % 10)) / 10) + 1);
+        if (length < minLength) {
+            length = minLength - 1;
+            minLength = length;
+        }
+
         // create token URI
-        _createTokenURI(newTokenId, SafeCast.toUint8(((size - (size % 10)) / 10) + 1));
+        _createTokenURI(newTokenId, length);
 
         /**
          * Store fees in tracker variable
