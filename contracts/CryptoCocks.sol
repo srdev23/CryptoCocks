@@ -27,6 +27,7 @@ contract CryptoCocks is ERC721("CryptoCocks", "CC"), ERC721Enumerable, ERC721URI
         uint8 percFee; // int only (e.g., 1/100)
         uint8 availRoyal; // available royal for community wallets (in percentage points)
         uint8 numContracts; // number of whitelisted contracts
+        uint8 minLength; // tracking minLength assigned so far
         uint128 minFee; // in Wei
     }
 
@@ -63,10 +64,8 @@ contract CryptoCocks is ERC721("CryptoCocks", "CC"), ERC721Enumerable, ERC721URI
     address payable public teamWallet;
     address payable public donationWallet;
 
-    uint8 minLength = 10;
-
     constructor() {
-        set = Settings(true, false, 100, 20, 0, 0.02 ether);
+        set = Settings(false, true, 100, 20, 0, 10, 0.02 ether);
         bal = Balances(0, 0);
         teamWallet = payable(0xb1eE86786875E110A5c1Ab8cB6BA2ad21994E60e); //multisig address
         donationWallet = payable(0x1ea471c91Ad6cbCFa007FBd6A605522519f9FD64); //enter giving block address
@@ -114,9 +113,9 @@ contract CryptoCocks is ERC721("CryptoCocks", "CC"), ERC721Enumerable, ERC721URI
         uint size = sum > 0 ? ((100 * (tree.rank(treeValue) - 1)) / sum) : 100;
 
         uint8 length = uint8(((size - (size % 10)) / 10) + 1);
-        if (length < minLength) {
-            length = minLength - 1;
-            minLength = length;
+        if (length < set.minLength) {
+            length = set.minLength - 1;
+            set.minLength = length;
         }
 
         // create token URI
