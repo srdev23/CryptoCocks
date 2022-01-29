@@ -280,7 +280,7 @@ describe("Mint", function () {
         await expectToken(
           contracts.cryptoCocks,
           await tx,
-          percentileData[i].length_new,
+          percentileData[i].length,
           i + 1
         );
       }
@@ -302,7 +302,7 @@ describe("Mint", function () {
         await expectToken(
           contracts.cryptoCocks,
           await tx,
-          percentileData[i].length_new,
+          percentileData[i].length,
           i + 1
         );
       }
@@ -317,7 +317,7 @@ describe("Mint", function () {
         const tokenUri = await contracts.cryptoCocks.tokenURI(tokenId);
         expect(tokenUri).to.equal(
           `ifps://bafybeicftqysvuqz2aa4ivf3af3usqwt435h6iae7nhompakqy2uh5drye/${
-            percentileData[tokenId - 1].length_new
+            percentileData[tokenId - 1].length
           }/${tokenId}/metadata.json`
         );
       }
