@@ -40,6 +40,7 @@ describe("Mint", function () {
     nonOwner = signer1;
     contracts = await deploy(owner);
     percentileData = await loadPercentileData();
+    await setContractToPublicSale(contracts.cryptoCocks, owner);
   });
 
   describe("Private Sale", function () {

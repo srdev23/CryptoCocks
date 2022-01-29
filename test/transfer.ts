@@ -10,6 +10,7 @@ import {
   getMintValue,
   mint,
   mintTestToken,
+  setContractToPublicSale,
   // eslint-disable-next-line node/no-missing-import
 } from "./helper";
 import { BigNumber, Signer } from "ethers";
@@ -40,6 +41,7 @@ describe("Transfers", function () {
     const provider = waffle.provider;
     team = provider.getSigner(TEAM_WALLET);
     donation = provider.getSigner(DONATION_WALLET);
+    await setContractToPublicSale(contracts.cryptoCocks, owner);
   });
 
   describe("Split Sent Ether", function () {

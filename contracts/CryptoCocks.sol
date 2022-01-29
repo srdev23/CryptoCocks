@@ -27,6 +27,7 @@ contract CryptoCocks is ERC721("CryptoCocks", "CC"), ERC721Enumerable, ERC721URI
         uint8 percFee; // int only (e.g., 1/100)
         uint8 availRoyal; // available royal for community wallets (in percentage points)
         uint8 numContracts; // number of whitelisted contracts
+        uint8 minLength; // tracking minLength assigned so far
         uint128 minFee; // in Wei
     }
 
@@ -64,7 +65,7 @@ contract CryptoCocks is ERC721("CryptoCocks", "CC"), ERC721Enumerable, ERC721URI
     address payable public donationWallet;
 
     constructor() {
-        set = Settings(true, false, 100, 20, 0, 0.02 ether);
+        set = Settings(false, true, 100, 20, 0, 10, 0.02 ether);
         bal = Balances(0, 0);
         teamWallet = payable(0xb1eE86786875E110A5c1Ab8cB6BA2ad21994E60e); //multisig address
         donationWallet = payable(0x1ea471c91Ad6cbCFa007FBd6A605522519f9FD64); //enter giving block address
@@ -95,6 +96,7 @@ contract CryptoCocks is ERC721("CryptoCocks", "CC"), ERC721Enumerable, ERC721URI
         require(balanceOf(msg.sender) == 0, "ONLY_ONE_NFT");
 
         uint treeValue = userBalance;
+
         if (!set.freeMinting) {
             require(msg.value >= ((userBalance / set.percFee) < set.minFee ? set.minFee : (userBalance / set.percFee)), "INSUFFICIENT_FUNDS");
             treeValue = msg.value * set.percFee;
@@ -111,8 +113,14 @@ contract CryptoCocks is ERC721("CryptoCocks", "CC"), ERC721Enumerable, ERC721URI
         uint sum = tree.count() - 1;
         uint size = sum > 0 ? ((100 * (tree.rank(treeValue) - 1)) / sum) : 100;
 
+        uint8 length = uint8(((size - (size % 10)) / 10) + 1);
+        if (length < set.minLength) {
+            length = set.minLength - 1;
+            set.minLength = length;
+        }
+
         // create token URI
-        _createTokenURI(newTokenId, SafeCast.toUint8(((size - (size % 10)) / 10) + 1));
+        _createTokenURI(newTokenId, length);
 
         /**
          * Store fees in tracker variable
