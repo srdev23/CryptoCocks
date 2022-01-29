@@ -10,7 +10,6 @@ import "@openzeppelin/contracts/utils/Counters.sol";
 import "@openzeppelin/contracts/utils/Strings.sol";
 import "@openzeppelin/contracts/utils/math/SafeCast.sol";
 import "./OrderStatisticsTreeLib.sol";
-import "hardhat/console.sol";
 
 contract TokenInterface {
     // solhint-disable-next-line no-empty-blocks
