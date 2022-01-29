@@ -10,6 +10,7 @@ import {
   getMintValue,
   mint,
   mintTestToken,
+  setContractToPublicSale,
   // eslint-disable-next-line node/no-missing-import
 } from "./helper";
 import { BigNumber, Signer } from "ethers";
@@ -44,6 +45,7 @@ describe("Transfers", function () {
 
   describe("Split Sent Ether", function () {
     it("should collect 50% of sent ether for the team", async () => {
+      await setContractToPublicSale(contracts.cryptoCocks, owner);
       await assertCollectedBalance(
         contracts.cryptoCocks,
         BigNumber.from(0),
@@ -63,6 +65,7 @@ describe("Transfers", function () {
     });
 
     it("should collect 30% of sent ether for donation", async () => {
+      await setContractToPublicSale(contracts.cryptoCocks, owner);
       await assertCollectedBalance(
         contracts.cryptoCocks,
         BigNumber.from(0),
@@ -118,6 +121,7 @@ describe("Transfers", function () {
     });
 
     it("should be possible to withdraw community royalty by community wallet", async () => {
+      await setContractToPublicSale(contracts.cryptoCocks, owner);
       const value = await getMintValue(nonCommunityTokenHolder);
       const mintTx = mint(contracts.cryptoCocks, nonCommunityTokenHolder);
 
@@ -149,6 +153,7 @@ describe("Transfers", function () {
   });
 
   it("should transfer fees with every 50th mint", async () => {
+    await setContractToPublicSale(contracts.cryptoCocks, owner);
     let valueSum = BigNumber.from(0);
     for (let i = 0; i < 100; i++) {
       const minter = await getMinter(minters, 3, i);
