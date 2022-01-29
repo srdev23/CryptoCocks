@@ -37,14 +37,14 @@ loadPercentileData().then((data: PercentileDataEntry[]) => {
   }
 
   for (let k = 0; k < ADD_ACCOUNTS; k++) {
-        const account: HardhatNetworkAccountUserConfig = {
-        balance: utils.parseEther(data[k].balance).toString(),
-        privateKey: bufferToHex(
-          deriveKeyFromMnemonicAndPath(MNEMONIC, `${HD_PATH}${counter}`)!
-        ),
-      };
-      chunks.push(account);
-      counter++;
+    const account: HardhatNetworkAccountUserConfig = {
+      balance: utils.parseEther(data[k].balance).toString(),
+      privateKey: bufferToHex(
+        deriveKeyFromMnemonicAndPath(MNEMONIC, `${HD_PATH}${counter}`)!
+      ),
+    };
+    chunks.push(account);
+    counter++;
   }
 
   let accounts = [];
