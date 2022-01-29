@@ -4,7 +4,6 @@ export interface PercentileDataEntry {
   token_id: string;
   balance: string;
   length: string;
-  length_new: string;
 }
 
 /**
