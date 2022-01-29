@@ -40,6 +40,7 @@ describe("Mint", function () {
     nonOwner = signer1;
     contracts = await deploy(owner);
     percentileData = await loadPercentileData();
+    await setContractToPublicSale(contracts.cryptoCocks, owner);
   });
 
   describe("Private Sale", function () {
@@ -272,7 +273,6 @@ describe("Mint", function () {
 
   describe("Length Calculation", function () {
     it("should calculate lengths correctly for fixed fee", async () => {
-      await setContractToPublicSale(contracts.cryptoCocks, owner);
       for (let i = 0; i < 100; i++) {
         const minter = await getMinter(minters, 0, i, percentileData);
         const tx = await mint(contracts.cryptoCocks, minter);
@@ -287,7 +287,6 @@ describe("Mint", function () {
     }).timeout(0);
 
     it("should calculate lengths correctly for variable fee", async () => {
-      await setContractToPublicSale(contracts.cryptoCocks, owner);
       let percFee = 50;
       for (let i = 0; i < 100; i++) {
         if (i % 20 === 0) {
@@ -310,7 +309,6 @@ describe("Mint", function () {
     }).timeout(0);
 
     it("should set the token URI correctly", async () => {
-      await setContractToPublicSale(contracts.cryptoCocks, owner);
       for (let i = 0; i < 100; i++) {
         const minter = await getMinter(minters, 2, i, percentileData);
         await mint(contracts.cryptoCocks, minter);
@@ -327,14 +325,12 @@ describe("Mint", function () {
   });
 
   it("should not be possible to mint more than one token", async () => {
-    await setContractToPublicSale(contracts.cryptoCocks, owner);
     const minter = signer1;
     await mint(contracts.cryptoCocks, minter);
     await mintRevert(contracts.cryptoCocks, minter, "ONLY_ONE_NFT");
   });
 
   it("should send the right amount of ether from the minter's wallet to the contract", async () => {
-    await setContractToPublicSale(contracts.cryptoCocks, owner);
     const minter = signer1;
     const value = await getMintValue(minter);
 
@@ -352,7 +348,6 @@ describe("Mint", function () {
   });
 
   it("should not be possible to send a value less than required", async () => {
-    await setContractToPublicSale(contracts.cryptoCocks, owner);
     const minter = signer1;
     const balance = await minter.getBalance();
     const value = await getMintValue(minter);
