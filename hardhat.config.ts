@@ -11,8 +11,6 @@ import { removeConsoleLog } from "hardhat-preprocessor";
 import { HardhatRuntimeEnvironment } from "hardhat/types";
 const accounts = require("./accounts.json");
 
-console.log(accounts.length);
-
 dotenv.config();
 
 const config: HardhatUserConfig = {
