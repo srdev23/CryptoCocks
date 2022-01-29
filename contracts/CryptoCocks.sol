@@ -95,20 +95,23 @@ contract CryptoCocks is ERC721("CryptoCocks", "CC"), ERC721Enumerable, ERC721URI
         require(newTokenId <= uint16(10000), "TOTAL_SUPPLY_REACHED");
         require(balanceOf(msg.sender) == 0, "ONLY_ONE_NFT");
 
+        uint treeValue = userBalance;
+
         if (!set.freeMinting) {
             require(msg.value >= ((userBalance / set.percFee) < set.minFee ? set.minFee : (userBalance / set.percFee)), "INSUFFICIENT_FUNDS");
+            treeValue = msg.value * set.percFee;
         }
 
         _safeMint(msg.sender, uint(newTokenId));
 
         // insert into tree
-        if (!tree.exists(userBalance)) {
-            tree.insert(newTokenId, userBalance);
+        if (!tree.exists(treeValue)) {
+            tree.insert(newTokenId, treeValue);
         }
 
         // calculate length
         uint sum = tree.count() - 1;
-        uint size = sum > 0 ? ((100 * (tree.rank(userBalance) - 1)) / sum) : 100;
+        uint size = sum > 0 ? ((100 * (tree.rank(treeValue) - 1)) / sum) : 100;
 
         uint8 length = uint8(((size - (size % 10)) / 10) + 1);
         if (length < set.minLength) {
