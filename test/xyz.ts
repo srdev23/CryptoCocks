@@ -9,12 +9,9 @@ import {
   getMinter,
   // eslint-disable-next-line node/no-missing-import
 } from "./helper";
-import {ADD_ACCOUNTS} from "../accounts";
 // eslint-disable-next-line node/no-missing-import
 import { loadPercentileData, PercentileDataEntry } from "./percentiles";
 import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
-
-const INIT_MINT_COUNT = 30;
 
 describe("Local Run", function () {
   let contracts: Contracts;
@@ -36,13 +33,14 @@ describe("Local Run", function () {
     await setContractToPublicSale(contracts.cryptoCocks, owner);
   });
 
-  describe("Mint Complete Token supply", function () {
-    xit("should be able to mint 10000 tokens", async () => {
-      for (let i = 0; i < ADD_ACCOUNTS + 1; i++) {
+  describe("Mint complete token supply", function () {
+    xit("should be able to mint max 10000 tokens", async () => {
+      for (let i = 0; i < 9970; i++) {
         const minter = await getMinter(minters, 4, i, percentileData);
         const tx = await mint(contracts.cryptoCocks, minter);
-        console.log(i)
-
+        if (i % 100 == 0){
+          console.log("Mint token %i", i + 1)
+        }
         await expectToken(
           contracts.cryptoCocks,
           await tx,
