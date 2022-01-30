@@ -43,7 +43,7 @@ async function main() {
   saveAddressesJson({
     CryptoCocks: cryptoCocks.address,
   });
-  saveABIJson("BaseCryptoProject");
+  saveABIJson("CryptoCocks");
 }
 
 // We recommend this pattern to be able to use async/await everywhere
