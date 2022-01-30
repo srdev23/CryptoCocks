@@ -240,7 +240,7 @@ contract CryptoCocks is ERC721("CryptoCocks", "CC"), ERC721Enumerable, ERC721URI
      * Set _baseURI()
      */
     function _baseURI() internal pure override returns (string memory) {
-        return "ifps://bafybeiaujyvo6hnncdid4rfmwh2bgvyvgji2qewna6qtgwflok6itxpwxi/";
+        return "ipfs://bafybeiaujyvo6hnncdid4rfmwh2bgvyvgji2qewna6qtgwflok6itxpwxi/";
     }
 
     /**
