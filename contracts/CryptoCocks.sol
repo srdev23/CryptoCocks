@@ -10,7 +10,6 @@ import "@openzeppelin/contracts/utils/Counters.sol";
 import "@openzeppelin/contracts/utils/Strings.sol";
 import "@openzeppelin/contracts/utils/math/SafeCast.sol";
 import "./OrderStatisticsTreeLib.sol";
-import "hardhat/console.sol";
 
 contract TokenInterface {
     // solhint-disable-next-line no-empty-blocks
@@ -241,7 +240,7 @@ contract CryptoCocks is ERC721("CryptoCocks", "CC"), ERC721Enumerable, ERC721URI
      * Set _baseURI()
      */
     function _baseURI() internal pure override returns (string memory) {
-        return "ifps://bafybeicftqysvuqz2aa4ivf3af3usqwt435h6iae7nhompakqy2uh5drye/";
+        return "ipfs://bafybeiaujyvo6hnncdid4rfmwh2bgvyvgji2qewna6qtgwflok6itxpwxi/";
     }
 
     /**
