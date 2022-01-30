@@ -10,7 +10,9 @@
     "coverage": "hardhat coverage",
     "lint": "eslint '**/*.{js,ts}'",
     "lint:fix": "hardhat compile && eslint '**/*.{js,ts}' --fix",
-    "generate:accounts": "ts-node accounts.ts"
+    "generate:accounts": "ts-node accounts.ts",
+    "deploy:rinkeby": "hardhat run scripts/deploy.ts --network rinkeby",
+    "verify": "hardhat verify --network rinkeby 0xF252B74C9DBAF92C506DC28f96F280f559F290cA"
   },
   "devDependencies": {
     "@fast-csv/parse": "^4.3.6",
