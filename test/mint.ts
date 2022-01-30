@@ -316,7 +316,7 @@ describe("Mint", function () {
         const tokenId = i + 1;
         const tokenUri = await contracts.cryptoCocks.tokenURI(tokenId);
         expect(tokenUri).to.equal(
-          `ifps://bafybeicftqysvuqz2aa4ivf3af3usqwt435h6iae7nhompakqy2uh5drye/${
+          `ipfs://bafybeiaujyvo6hnncdid4rfmwh2bgvyvgji2qewna6qtgwflok6itxpwxi/${
             percentileData[tokenId - 1].length_new
           }/${tokenId}/metadata.json`
         );
