@@ -6,6 +6,13 @@
 import { ethers } from "hardhat";
 // eslint-disable-next-line node/no-missing-import
 import { CryptoCocks } from "../typechain";
+import {
+  saveABIJson,
+  saveAddressesJson,
+  saveChainJson,
+  saveOwnerJson,
+  // eslint-disable-next-line node/no-missing-import
+} from "./generator";
 
 async function main() {
   // deploy libraries
@@ -25,6 +32,18 @@ async function main() {
   await cryptoCocks.deployed();
 
   console.log("CryptoCocks contract deployed to:", cryptoCocks.address);
+
+  const signers = await ethers.getSigners();
+  const owner = signers[0];
+  const network = await ethers.getDefaultProvider().getNetwork();
+  const chainId = network.chainId;
+
+  saveOwnerJson(owner.address);
+  saveChainJson(chainId);
+  saveAddressesJson({
+    CryptoCocks: cryptoCocks.address,
+  });
+  saveABIJson("BaseCryptoProject");
 }
 
 // We recommend this pattern to be able to use async/await everywhere
