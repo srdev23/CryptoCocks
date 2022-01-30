@@ -4,22 +4,27 @@
 // When running the script with `npx hardhat run <script>` you'll find the Hardhat
 // Runtime Environment's members available in the global scope.
 import { ethers } from "hardhat";
+// eslint-disable-next-line node/no-missing-import
+import { CryptoCocks } from "../typechain";
 
 async function main() {
-  // Hardhat always runs the compile task when running scripts with its command
-  // line interface.
-  //
-  // If this script is run directly using `node` you may want to call compile
-  // manually to make sure everything is compiled
-  // await hre.run('compile');
+  // deploy libraries
+  const OrderStatisticsTreeLib = await ethers.getContractFactory(
+    "OrderStatisticsTreeLib"
+  );
+  const orderStatisticsTreeLib = await OrderStatisticsTreeLib.deploy();
+  await orderStatisticsTreeLib.deployed();
 
-  // We get the contract to deploy
-  const Greeter = await ethers.getContractFactory("Greeter");
-  const greeter = await Greeter.deploy("Hello, Hardhat!");
+  // deploy crypto cocks contract
+  const CryptoCocks = await ethers.getContractFactory("CryptoCocks", {
+    libraries: {
+      OrderStatisticsTreeLib: orderStatisticsTreeLib.address,
+    },
+  });
+  const cryptoCocks = (await CryptoCocks.deploy()) as CryptoCocks;
+  await cryptoCocks.deployed();
 
-  await greeter.deployed();
-
-  console.log("Greeter deployed to:", greeter.address);
+  console.log("CryptoCocks contract deployed to:", cryptoCocks.address);
 }
 
 // We recommend this pattern to be able to use async/await everywhere
