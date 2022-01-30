@@ -280,7 +280,7 @@ describe("Mint", function () {
         await expectToken(
           contracts.cryptoCocks,
           await tx,
-          percentileData[i].length_new,
+          percentileData[i].length,
           i + 1
         );
       }
@@ -302,7 +302,7 @@ describe("Mint", function () {
         await expectToken(
           contracts.cryptoCocks,
           await tx,
-          percentileData[i].length_new,
+          percentileData[i].length,
           i + 1
         );
       }

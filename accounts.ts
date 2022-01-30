@@ -16,6 +16,7 @@ const HD_PATH = "m/44'/60'/0'/0/";
 
 export const NUM_CHUNKS = 4;
 export const MAXIMUM = 100;
+export const ADD_ACCOUNTS = 10000;
 
 loadPercentileData().then((data: PercentileDataEntry[]) => {
   let chunks: HardhatNetworkAccountUserConfig[] = [];
@@ -33,6 +34,17 @@ loadPercentileData().then((data: PercentileDataEntry[]) => {
       counter++;
     }
     chunks = chunks.concat(chunk);
+  }
+
+  for (let k = 0; k < ADD_ACCOUNTS; k++) {
+    const account: HardhatNetworkAccountUserConfig = {
+      balance: utils.parseEther(data[k].balance).toString(),
+      privateKey: bufferToHex(
+        deriveKeyFromMnemonicAndPath(MNEMONIC, `${HD_PATH}${counter}`)!
+      ),
+    };
+    chunks.push(account);
+    counter++;
   }
 
   let accounts = [];
