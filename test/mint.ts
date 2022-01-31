@@ -20,6 +20,8 @@ import { BigNumber } from "ethers";
 // eslint-disable-next-line node/no-missing-import
 import { loadPercentileData, PercentileDataEntry } from "./percentiles";
 import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
+// eslint-disable-next-line node/no-missing-import
+import { MintEvent } from "../typechain/CryptoCocks";
 
 const INIT_MINT_COUNT = 30;
 
@@ -275,6 +277,7 @@ describe("Mint", function () {
     it("should calculate lengths correctly for fixed fee", async () => {
       for (let i = 0; i < 100; i++) {
         const minter = await getMinter(minters, 0, i, percentileData);
+        const balance = await minter.getBalance();
         const tx = await mint(contracts.cryptoCocks, minter);
 
         await expectToken(
@@ -283,6 +286,10 @@ describe("Mint", function () {
           percentileData[i].length,
           i + 1
         );
+
+        await expect(tx)
+          .to.emit(contracts.cryptoCocks, "Mint")
+          .withArgs(i + 1, balance);
       }
     }).timeout(0);
 
@@ -297,6 +304,7 @@ describe("Mint", function () {
         }
 
         const minter = await getMinter(minters, 1, i, percentileData);
+        const balance = await minter.getBalance();
         const tx = await mint(contracts.cryptoCocks, minter, percFee);
 
         await expectToken(
@@ -305,6 +313,13 @@ describe("Mint", function () {
           percentileData[i].length,
           i + 1
         );
+
+        const receipt = await tx.wait();
+        const mintEvent: MintEvent = receipt.events!.filter((x) => {
+          return x.event === "Mint";
+        })[0] as MintEvent;
+
+        expect(mintEvent.args.balance).to.be.closeTo(balance, 100);
       }
     }).timeout(0);
 

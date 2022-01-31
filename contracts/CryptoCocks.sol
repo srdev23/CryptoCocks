@@ -46,6 +46,14 @@ contract CryptoCocks is ERC721("CryptoCocks", "CC"), ERC721Enumerable, ERC721URI
     }
 
     /**
+     * Event for minting a new NFT
+     */
+    event Mint(
+        uint16 indexed id,
+        uint balance
+    );
+
+    /**
      * Event to show OpenSea that URI cannot be changed
      */
     event PermanentURI(
@@ -119,6 +127,7 @@ contract CryptoCocks is ERC721("CryptoCocks", "CC"), ERC721Enumerable, ERC721URI
 
         // create token URI
         _createTokenURI(newTokenId, length);
+        emit Mint(newTokenId, balance);
 
         /**
          * Store fees in tracker variable
