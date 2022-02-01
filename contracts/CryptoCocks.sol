@@ -23,6 +23,7 @@ contract CryptoCocks is ERC721("CryptoCocks", "CC"), ERC721Enumerable, ERC721URI
     struct Settings {
         bool publicSaleStatus; // true => active public sale
         bool freeMinting; // true => minting does not require fee
+        bool initMint; // true => initMint was not yet executed
         uint8 percFee; // int only (e.g., 1/100)
         uint8 availRoyal; // available royal for community wallets (in percentage points)
         uint8 numContracts; // number of whitelisted contracts
@@ -72,7 +73,7 @@ contract CryptoCocks is ERC721("CryptoCocks", "CC"), ERC721Enumerable, ERC721URI
     address payable public donationWallet;
 
     constructor() {
-        set = Settings(false, true, 100, 20, 0, 10, 0.02 ether);
+        set = Settings(false, true, true, 100, 20, 0, 10, 0.02 ether);
         bal = Balances(0, 0);
         teamWallet = payable(0xb1eE86786875E110A5c1Ab8cB6BA2ad21994E60e); //multisig address
         donationWallet = payable(0x1ea471c91Ad6cbCFa007FBd6A605522519f9FD64); //enter giving block address
@@ -94,7 +95,7 @@ contract CryptoCocks is ERC721("CryptoCocks", "CC"), ERC721Enumerable, ERC721URI
     payable
     {
         (bool wL, uint8 idx) = _checkListed(msg.sender);
-        uint16 newTokenId = uint16(_tokenIdTracker.current() + 1);
+        uint16 newTokenId = uint16(_tokenIdTracker.current() + 31);
 
         // test conditions
         require((set.publicSaleStatus || wL), "LOCK");
@@ -164,12 +165,12 @@ contract CryptoCocks is ERC721("CryptoCocks", "CC"), ERC721Enumerable, ERC721URI
      * Initialize minting process with 30 auto-minted NFTs for the contract owner
      */
     function initMint() external onlyOwner {
-        require(_tokenIdTracker.current() < 30, "ONLY_ONCE");
+        require(set.initMint, "ONLY_ONCE");
         for (uint i = 0; i < 30; i++) {
-            uint16 newTokenId = uint16(_tokenIdTracker.current() + 1);
-            _safeMint(msg.sender, newTokenId);
+            _safeMint(msg.sender, uint16(i+1));
             uint8 length = SafeCast.toUint8(i > 9 ? (i % 10) + 1: 11);
-            _createTokenURI(newTokenId, length);
+            _createTokenURI(uint16(i+1), length);
+            set.initMint = false;
         }
     }
 

@@ -225,11 +225,15 @@ export async function expectToken(
   cryptoCocks: CryptoCocks,
   mintTx: ContractTransaction,
   length: string,
-  tokenId: number
+  tokenId: number,
+  startToken: number
 ) {
   await expect(mintTx)
     .to.emit(cryptoCocks, "PermanentURI")
-    .withArgs(`${length}/${tokenId}/metadata.json`, BigNumber.from(tokenId));
+    .withArgs(
+      `${length}/${tokenId + startToken}/metadata.json`,
+      BigNumber.from(tokenId + startToken)
+    );
 }
 
 export interface FeeSettings {

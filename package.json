@@ -16,6 +16,9 @@
     "deploy": "hardhat run scripts/deploy.ts --network localhost",
     "verify": "hardhat verify --network rinkeby 0xF252B74C9DBAF92C506DC28f96F280f559F290cA"
   },
+  "engines": {
+      "node": ">=8.5.0"
+  },
   "devDependencies": {
     "@fast-csv/parse": "^4.3.6",
     "@nomiclabs/hardhat-ethers": "^2.0.3",

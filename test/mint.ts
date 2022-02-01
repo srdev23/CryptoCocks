@@ -284,12 +284,13 @@ describe("Mint", function () {
           contracts.cryptoCocks,
           await tx,
           percentileData[i].length,
-          i + 1
+          i + 1,
+          INIT_MINT_COUNT
         );
 
         await expect(tx)
           .to.emit(contracts.cryptoCocks, "Mint")
-          .withArgs(i + 1, balance);
+          .withArgs(i + 30 + 1, balance);
       }
     }).timeout(0);
 
@@ -311,7 +312,8 @@ describe("Mint", function () {
           contracts.cryptoCocks,
           await tx,
           percentileData[i].length,
-          i + 1
+          i + 1,
+          INIT_MINT_COUNT
         );
 
         const receipt = await tx.wait();
@@ -328,14 +330,38 @@ describe("Mint", function () {
         const minter = await getMinter(minters, 2, i, percentileData);
         await mint(contracts.cryptoCocks, minter);
 
-        const tokenId = i + 1;
+        const tokenId = i + 30 + 1;
         const tokenUri = await contracts.cryptoCocks.tokenURI(tokenId);
         expect(tokenUri).to.equal(
           `ipfs://bafybeiaujyvo6hnncdid4rfmwh2bgvyvgji2qewna6qtgwflok6itxpwxi/${
-            percentileData[tokenId - 1].length
+            percentileData[tokenId - 1 - 30].length
           }/${tokenId}/metadata.json`
         );
       }
+    }).timeout(0);
+
+    it("should calculate lengths correctly for a late initMint", async () => {
+      for (let i = 0; i < 100; i++) {
+        const minter = await getMinter(minters, 3, i, percentileData);
+        await mint(contracts.cryptoCocks, minter);
+      }
+
+      const mintTx = await contracts.cryptoCocks.connect(owner).initMint();
+      await mintTx.wait();
+      const lengths = [
+        11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10,
+        1, 2, 3, 4, 5, 6, 7, 8, 9, 10,
+      ];
+      // expect `PermanentURI` event for newly minted token with correct length
+      for (let i = 1; i <= 30; i++) {
+        await expect(mintTx)
+          .to.emit(contracts.cryptoCocks, "PermanentURI")
+          .withArgs(`${lengths[i - 1]}/${i}/metadata.json`, BigNumber.from(i));
+      }
+
+      expect(await contracts.cryptoCocks.totalSupply()).to.equal(
+        INIT_MINT_COUNT + 100
+      );
     }).timeout(0);
   });
 

@@ -153,13 +153,13 @@ describe("Transfers", function () {
   it("should transfer fees with every 50th mint", async () => {
     let valueSum = BigNumber.from(0);
     for (let i = 0; i < 100; i++) {
-      const minter = await getMinter(minters, 3, i);
+      const minter = await getMinter(minters, 4, i);
       const value = await getMintValue(minter);
       valueSum = valueSum.add(value);
       const tx = mint(contracts.cryptoCocks, minter);
 
       // note: token id counter begins with 1
-      if ((i + 1) % 50 === 0) {
+      if ((i + 30 + 1) % 50 === 0) {
         await expect(() => tx).to.changeEtherBalance(
           team,
           valueSum.div(100).mul(PERCENTAGE_TEAM)

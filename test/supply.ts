@@ -30,7 +30,7 @@ describe.skip("Maximum Supply", function () {
 
   it("should be able to mint max 10000 tokens", async function () {
     for (let i = 0; i < 10000; i++) {
-      const minter = await getMinter(minters, 4, i, percentileData);
+      const minter = await getMinter(minters, 5, i, percentileData);
       const tx = await mint(contracts.cryptoCocks, minter);
       if (i % 100 === 0) {
         console.log("Mint token %i", i + 1);
@@ -39,7 +39,8 @@ describe.skip("Maximum Supply", function () {
         contracts.cryptoCocks,
         await tx,
         percentileData[i].length,
-        i + 1
+        i + 1,
+        30
       );
     }
   }).timeout(0);
