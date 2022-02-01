@@ -109,7 +109,7 @@ describe("Mint", function () {
       for (let i = 1; i <= 30; i++) {
         await expect(mintTx)
           .to.emit(contracts.cryptoCocks, "PermanentURI")
-          .withArgs(`${lengths[i - 1]}_${i}_metadata.json`, BigNumber.from(i));
+          .withArgs(`${lengths[i - 1]}_${i}.json`, BigNumber.from(i));
       }
 
       expect(await contracts.cryptoCocks.totalSupply()).to.equal(
@@ -335,7 +335,7 @@ describe("Mint", function () {
         expect(tokenUri).to.equal(
           `ipfs://bafybeiaujyvo6hnncdid4rfmwh2bgvyvgji2qewna6qtgwflok6itxpwxi/${
             percentileData[tokenId - 1 - 30].length
-          }_${tokenId}_metadata.json`
+          }_${tokenId}.json`
         );
       }
     }).timeout(0);
@@ -356,7 +356,7 @@ describe("Mint", function () {
       for (let i = 1; i <= 30; i++) {
         await expect(mintTx)
           .to.emit(contracts.cryptoCocks, "PermanentURI")
-          .withArgs(`${lengths[i - 1]}_${i}_metadata.json`, BigNumber.from(i));
+          .withArgs(`${lengths[i - 1]}_${i}.json`, BigNumber.from(i));
       }
 
       expect(await contracts.cryptoCocks.totalSupply()).to.equal(

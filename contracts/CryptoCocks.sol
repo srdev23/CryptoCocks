@@ -296,7 +296,7 @@ contract CryptoCocks is ERC721("CryptoCocks", "CC"), ERC721Enumerable, ERC721URI
     * Crate TokenURI during mint process
     */
     function _createTokenURI(uint16 _newTokenId, uint8 _length) private {
-        string memory _tokenURI = string(abi.encodePacked(Strings.toString(_length), "_", Strings.toString(_newTokenId), "_metadata.json"));
+        string memory _tokenURI = string(abi.encodePacked(Strings.toString(_length), "_", Strings.toString(_newTokenId), ".json"));
         _setTokenURI(_newTokenId, _tokenURI);
         emit PermanentURI(_tokenURI, _newTokenId);
         _tokenIdTracker.increment();
