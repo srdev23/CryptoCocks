@@ -21,7 +21,7 @@ const PERCENTAGE_TEAM = 50;
 const PERCENTAGE_DONATION = 30;
 // const PERCENTAGE_COMMUNITIES = 20;
 
-const TEAM_WALLET = "0xb1eE86786875E110A5c1Ab8cB6BA2ad21994E60e";
+const TEAM_WALLET = "0xAd5D53b51aBBf09d38d0D32F46C2fc4e62dA2a3f";
 const DONATION_WALLET = "0x1ea471c91Ad6cbCFa007FBd6A605522519f9FD64";
 
 describe("Transfers", function () {
@@ -152,21 +152,20 @@ describe("Transfers", function () {
 
   it("should transfer fees with every 50th mint", async () => {
     let valueSum = BigNumber.from(0);
-    for (let i = 0; i < 100; i++) {
-      const minter = await getMinter(minters, 4, i);
+    for (let i = 1; i <= 100; i++) {
+      const minter = await getMinter(minters, 4, i - 1); // token id begins with 1
       const value = await getMintValue(minter);
       valueSum = valueSum.add(value);
       const tx = mint(contracts.cryptoCocks, minter);
 
-      // note: token id counter begins with 1
-      if ((i + 30 + 1) % 50 === 0) {
-        await expect(() => tx).to.changeEtherBalance(
-          team,
-          valueSum.div(100).mul(PERCENTAGE_TEAM)
-        );
-        await expect(() => tx).to.changeEtherBalance(
-          donation,
-          valueSum.div(100).mul(PERCENTAGE_DONATION)
+      const tokenId = i + 30;
+      if (tokenId % 50 === 0) {
+        await expect(() => tx).to.changeEtherBalances(
+          [team, donation],
+          [
+            valueSum.div(100).mul(PERCENTAGE_TEAM),
+            valueSum.div(100).mul(PERCENTAGE_DONATION),
+          ]
         );
         valueSum = BigNumber.from(0);
       }
