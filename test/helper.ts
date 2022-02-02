@@ -231,7 +231,7 @@ export async function expectToken(
   await expect(mintTx)
     .to.emit(cryptoCocks, "PermanentURI")
     .withArgs(
-      `${length}/${tokenId + startToken}/metadata.json`,
+      `${length}_${tokenId + startToken}.json`,
       BigNumber.from(tokenId + startToken)
     );
 }
