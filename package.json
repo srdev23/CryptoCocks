@@ -14,7 +14,7 @@
     "generate:accounts": "ts-node accounts.ts",
     "deploy:rinkeby": "hardhat run scripts/deploy.ts --network rinkeby",
     "deploy": "hardhat run scripts/deploy.ts --network localhost",
-    "verify": "hardhat verify --network rinkeby 0xF252B74C9DBAF92C506DC28f96F280f559F290cA"
+    "verify": "hardhat verify --network rinkeby 0x31c049594c18Ac0b0F681c376c7c3F0C5c0d2333"
   },
   "engines": {
       "node": ">=8.5.0"

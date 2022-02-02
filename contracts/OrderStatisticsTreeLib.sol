@@ -17,6 +17,7 @@ library OrderStatisticsTreeLib {
 
     struct Tree {
         uint root;
+        uint8 minLength; // tracking minLength assigned so far
         mapping(uint => Node) nodes;
     }
 
@@ -36,7 +37,7 @@ library OrderStatisticsTreeLib {
         return getNodeCount(self, self.root);
     }
 
-    function rank(Tree storage self, uint value) external view returns(uint _rank) {
+    function rank(Tree storage self, uint value) private view returns(uint _rank) {
         _rank = 0;
         if (count(self) > 0) {
             bool finished = false;
@@ -72,36 +73,56 @@ library OrderStatisticsTreeLib {
         }
     }
 
+    function insertCock(Tree storage self, uint16 newTokenId, uint balance) public returns(uint8) {
+        insert(self, newTokenId, balance);
+
+        if (self.minLength == EMPTY) {
+            self.minLength = 10;
+        }
+
+        uint sum = count(self) - 1;
+        uint size = sum > 0 ? ((100 * (rank(self, balance) - 1)) / sum) : 100;
+
+        uint8 length = uint8(((size - (size % 10)) / 10) + 1);
+        if (length < self.minLength) {
+            length = self.minLength - 1;
+            self.minLength = length;
+        }
+        return length;
+    }
+
     function insert(Tree storage self, uint16 key, uint value) public {
-        require(value != EMPTY, "zero");
-        uint cursor = EMPTY;
-        uint probe = self.root;
-        while (probe != EMPTY) {
-            cursor = probe;
-            if (value < probe) {
-                probe = self.nodes[probe].left;
-            } else if (value > probe) {
-                probe = self.nodes[probe].right;
-            } else if (value == probe) {
-                self.nodes[probe].keys.push(key);
-                return;
+        if (!exists(self, value)) {
+            require(value != EMPTY, "zero");
+            uint cursor = EMPTY;
+            uint probe = self.root;
+            while (probe != EMPTY) {
+                cursor = probe;
+                if (value < probe) {
+                    probe = self.nodes[probe].left;
+                } else if (value > probe) {
+                    probe = self.nodes[probe].right;
+                } else if (value == probe) {
+                    self.nodes[probe].keys.push(key);
+                    return;
+                }
+                self.nodes[cursor].count++;
             }
-            self.nodes[cursor].count++;
+            Node storage nValue = self.nodes[value];
+            nValue.parent = cursor;
+            nValue.left = EMPTY;
+            nValue.right = EMPTY;
+            nValue.red = true;
+            nValue.keys.push(key);
+            if (cursor == EMPTY) {
+                self.root = value;
+            } else if (value < cursor) {
+                self.nodes[cursor].left = value;
+            } else {
+                self.nodes[cursor].right = value;
+            }
+            insertFixup(self, value);
         }
-        Node storage nValue = self.nodes[value];
-        nValue.parent = cursor;
-        nValue.left = EMPTY;
-        nValue.right = EMPTY;
-        nValue.red = true;
-        nValue.keys.push(key);
-        if (cursor == EMPTY) {
-            self.root = value;
-        } else if (value < cursor) {
-            self.nodes[cursor].left = value;
-        } else {
-            self.nodes[cursor].right = value;
-        }
-        insertFixup(self, value);
     }
 
     function rotateLeft(Tree storage self, uint value) private {

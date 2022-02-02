@@ -298,3 +298,18 @@ export async function assertCollectedBalance(
   const balances = await cryptoCocks.bal();
   expect(balances[balanceType]).to.equal(balance);
 }
+
+const cids = ["b1", "b2", "b3", "b4", "b5"];
+
+export function getCID(tokenId: number) {
+  if (tokenId <= 2000) {
+    return cids[0];
+  } else if (tokenId <= 4000) {
+    return cids[1];
+  } else if (tokenId <= 6000) {
+    return cids[2];
+  } else if (tokenId <= 8000) {
+    return cids[3];
+  }
+  return cids[4];
+}

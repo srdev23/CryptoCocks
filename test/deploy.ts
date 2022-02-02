@@ -28,10 +28,18 @@ export async function deployContracts(signer: Signer) {
   const orderStatisticsTreeLib = await OrderStatisticsTreeLib.deploy();
   await orderStatisticsTreeLib.deployed();
 
+  const CryptoCocksLib = await ethers.getContractFactory(
+    "CryptoCocksLib",
+    signer
+  );
+  const cryptoCocksLib = await CryptoCocksLib.deploy();
+  await cryptoCocksLib.deployed();
+
   // deploy crypto cocks contract
   const CryptoCocks = await ethers.getContractFactory("CryptoCocks", {
     libraries: {
       OrderStatisticsTreeLib: orderStatisticsTreeLib.address,
+      CryptoCocksLib: cryptoCocksLib.address,
     },
     signer,
   });

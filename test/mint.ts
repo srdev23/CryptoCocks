@@ -14,6 +14,7 @@ import {
   mintRevert,
   changeFeeSettings,
   getMinter,
+  getCID,
   // eslint-disable-next-line node/no-missing-import
 } from "./helper";
 import { BigNumber } from "ethers";
@@ -333,7 +334,7 @@ describe("Mint", function () {
         const tokenId = i + 30 + 1;
         const tokenUri = await contracts.cryptoCocks.tokenURI(tokenId);
         expect(tokenUri).to.equal(
-          `ipfs://bafybeiaujyvo6hnncdid4rfmwh2bgvyvgji2qewna6qtgwflok6itxpwxi/${
+          `ipfs://${getCID(tokenId)}/${
             percentileData[tokenId - 1 - 30].length
           }_${tokenId}.json`
         );
