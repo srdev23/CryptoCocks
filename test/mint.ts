@@ -386,7 +386,7 @@ describe("Mint", function () {
       const numberTokens = 100;
 
       for (let i = 0; i < numberTokens; i++) {
-        const minter = await getMinter(minters, 6, i, percentileData);
+        const minter = await getMinter(minters, 5, i, percentileData);
         const tx = mint(contracts.cryptoCocks, minter);
         const tokenId = i + 31;
         await expect(tx)
