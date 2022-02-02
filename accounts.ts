@@ -14,7 +14,7 @@ const MNEMONIC =
   "hollow cycle obscure tumble office alarm slam fragile online peace wink together";
 const HD_PATH = "m/44'/60'/0'/0/";
 
-export const NUM_CHUNKS = 5;
+export const NUM_CHUNKS = 6;
 export const MAXIMUM = 100;
 export const ADD_ACCOUNTS = 10000;
 
