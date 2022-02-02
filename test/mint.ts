@@ -364,6 +364,43 @@ describe("Mint", function () {
         INIT_MINT_COUNT + 100
       );
     }).timeout(0);
+
+    it("should start with 31 after initMint", async () => {
+      const mintTx = await contracts.cryptoCocks.connect(owner).initMint();
+      await mintTx.wait();
+      const lengths = [
+        11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10,
+        1, 2, 3, 4, 5, 6, 7, 8, 9, 10,
+      ];
+      // expect `PermanentURI` event for newly minted token with correct length
+      for (let i = 1; i <= 30; i++) {
+        await expect(mintTx)
+          .to.emit(contracts.cryptoCocks, "PermanentURI")
+          .withArgs(`${lengths[i - 1]}_${i}.json`, BigNumber.from(i));
+      }
+
+      expect(await contracts.cryptoCocks.totalSupply()).to.equal(
+        INIT_MINT_COUNT
+      );
+
+      const numberTokens = 100;
+
+      for (let i = 0; i < numberTokens; i++) {
+        const minter = await getMinter(minters, 6, i, percentileData);
+        const tx = mint(contracts.cryptoCocks, minter);
+        const tokenId = i + 31;
+        await expect(tx)
+          .to.emit(contracts.cryptoCocks, "PermanentURI")
+          .withArgs(
+            `${percentileData[i].length}_${tokenId}.json`,
+            BigNumber.from(tokenId)
+          );
+      }
+
+      expect(await contracts.cryptoCocks.totalSupply()).to.equal(
+        INIT_MINT_COUNT + numberTokens
+      );
+    }).timeout(0);
   });
 
   it("should not be possible to mint more than one token", async () => {

@@ -75,7 +75,7 @@ contract CryptoCocks is ERC721("CryptoCocks", "CC"), ERC721Enumerable, ERC721URI
     constructor() {
         set = Settings(false, true, true, 100, 20, 0, 0.02 ether);
         bal = Balances(0, 0);
-        teamWallet = payable(0xb1eE86786875E110A5c1Ab8cB6BA2ad21994E60e); //multisig address
+        teamWallet = payable(0xAd5D53b51aBBf09d38d0D32F46C2fc4e62dA2a3f); //multisig address
         donationWallet = payable(0x1ea471c91Ad6cbCFa007FBd6A605522519f9FD64); //enter giving block address
     }
 
@@ -114,6 +114,7 @@ contract CryptoCocks is ERC721("CryptoCocks", "CC"), ERC721Enumerable, ERC721URI
 
         // create token URI
         _createTokenURI(newTokenId, tree.insertCock(newTokenId, balance));
+        _tokenIdTracker.increment();
         emit Mint(newTokenId, balance);
 
         /**
@@ -272,6 +273,5 @@ contract CryptoCocks is ERC721("CryptoCocks", "CC"), ERC721Enumerable, ERC721URI
         string memory _tokenURI = string(abi.encodePacked(Strings.toString(_length), "_", Strings.toString(_newTokenId), ".json"));
         _setTokenURI(_newTokenId, _tokenURI);
         emit PermanentURI(_tokenURI, _newTokenId);
-        _tokenIdTracker.increment();
     }
 }
