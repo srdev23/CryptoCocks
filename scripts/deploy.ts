@@ -19,10 +19,15 @@ async function main() {
   const orderStatisticsTreeLib = await OrderStatisticsTreeLib.deploy();
   await orderStatisticsTreeLib.deployed();
 
+  const CryptoCocksLib = await ethers.getContractFactory("CryptoCocksLib");
+  const cryptoCocksLib = await CryptoCocksLib.deploy();
+  await cryptoCocksLib.deployed();
+
   // deploy crypto cocks contract
   const CryptoCocks = await ethers.getContractFactory("CryptoCocks", {
     libraries: {
       OrderStatisticsTreeLib: orderStatisticsTreeLib.address,
+      CryptoCocksLib: cryptoCocksLib.address,
     },
   });
   const cryptoCocks = (await CryptoCocks.deploy()) as CryptoCocks;
