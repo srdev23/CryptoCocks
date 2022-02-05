@@ -16,6 +16,15 @@ dotenv.config();
 const config: HardhatUserConfig = {
   solidity: "0.8.7",
   networks: {
+    mainnet: {
+      url: process.env.MAINNET_URL,
+      accounts:
+        process.env.PRIVATE_KEY_MAINNET !== undefined
+          ? [process.env.PRIVATE_KEY_MAINNET]
+          : [],
+      gasPrice: 100,
+      gasMultiplier: 1.2,
+    },
     hardhat: {
       accounts,
     },
