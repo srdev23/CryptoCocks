@@ -18,10 +18,15 @@ async function main() {
   );
   const orderStatisticsTreeLib = await OrderStatisticsTreeLib.deploy();
   await orderStatisticsTreeLib.deployed();
+  console.log(
+    "OrderStatisticsTreeLib contract deployed to:",
+    orderStatisticsTreeLib.address
+  );
 
   const CryptoCocksLib = await ethers.getContractFactory("CryptoCocksLib");
   const cryptoCocksLib = await CryptoCocksLib.deploy();
   await cryptoCocksLib.deployed();
+  console.log("CryptoCocksLib contract deployed to:", cryptoCocksLib.address);
 
   // deploy crypto cocks contract
   const CryptoCocks = await ethers.getContractFactory("CryptoCocks", {
@@ -32,7 +37,6 @@ async function main() {
   });
   const cryptoCocks = (await CryptoCocks.deploy()) as CryptoCocks;
   await cryptoCocks.deployed();
-
   console.log("CryptoCocks contract deployed to:", cryptoCocks.address);
 
   const generate = process.env.GENERATE === "true";

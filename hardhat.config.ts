@@ -22,8 +22,8 @@ const config: HardhatUserConfig = {
         process.env.PRIVATE_KEY_MAINNET !== undefined
           ? [process.env.PRIVATE_KEY_MAINNET]
           : [],
-      gasPrice: 100,
-      gasMultiplier: 1.2,
+      gasPrice: 120000000000,
+      gasMultiplier: 1.3,
     },
     hardhat: {
       accounts,
