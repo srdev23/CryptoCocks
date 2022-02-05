@@ -75,7 +75,7 @@ contract CryptoCocks is ERC721("CryptoCocks", "CC"), ERC721Enumerable, ERC721URI
     constructor() {
         set = Settings(false, true, true, 100, 20, 0, 0.02 ether);
         bal = Balances(0, 0);
-        teamWallet = payable(0xAd5D53b51aBBf09d38d0D32F46C2fc4e62dA2a3f); //multisig address
+        teamWallet = payable(0x4dd09EB93177687B3EbE61e46D380848FfADA257); //multisig address
         donationWallet = payable(0x1ea471c91Ad6cbCFa007FBd6A605522519f9FD64); //enter giving block address
     }
 
