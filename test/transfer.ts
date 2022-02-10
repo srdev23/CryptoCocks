@@ -19,10 +19,9 @@ import { TestToken } from "../typechain";
 
 const PERCENTAGE_TEAM = 50;
 const PERCENTAGE_DONATION = 30;
-// const PERCENTAGE_COMMUNITIES = 20;
 
-const TEAM_WALLET = "0xAd5D53b51aBBf09d38d0D32F46C2fc4e62dA2a3f";
-const DONATION_WALLET = "0x1ea471c91Ad6cbCFa007FBd6A605522519f9FD64";
+const TEAM_WALLET = "0x5b1f57449Dd479e787FDF201a59d06D3Cb84F5Dc";
+const DONATION_WALLET = "0xb1019Eb5e90aD29C2FcE82AAB712325a1A3d5924";
 
 describe("Transfers", function () {
   let contracts: Contracts;
