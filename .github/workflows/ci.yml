@@ -1,4 +1,4 @@
-name: 'build-api'
+name: 'Contract CI Pipeline'
 on: ["push"]
 jobs:
   test:
