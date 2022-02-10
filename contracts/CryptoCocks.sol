@@ -50,7 +50,7 @@ contract CryptoCocks is ERC721("CryptoCocks", "CC"), ERC721Enumerable, ERC721URI
 
     Counters.Counter private _tokenIdTracker;
     OrderStatisticsTreeLib.Tree public tree;
-    CryptoCocksWhitelistingLib.Whitelist public whitelist;
+    CryptoCocksWhitelistingLib.Whitelist private whitelist;
 
     Settings public set;
     Balances public bal;
