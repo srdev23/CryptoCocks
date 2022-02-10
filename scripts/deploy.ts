@@ -28,11 +28,22 @@ async function main() {
   await cryptoCocksLib.deployed();
   console.log("CryptoCocksLib contract deployed to:", cryptoCocksLib.address);
 
+  const CryptoCocksWhitelistingLib = await ethers.getContractFactory(
+    "CryptoCocksWhitelistingLib"
+  );
+  const cryptoCocksWhitelistingLib = await CryptoCocksWhitelistingLib.deploy();
+  await cryptoCocksWhitelistingLib.deployed();
+  console.log(
+    "CryptoCocksWhitelistingLib contract deployed to:",
+    cryptoCocksWhitelistingLib.address
+  );
+
   // deploy crypto cocks contract
   const CryptoCocks = await ethers.getContractFactory("CryptoCocks", {
     libraries: {
       OrderStatisticsTreeLib: orderStatisticsTreeLib.address,
       CryptoCocksLib: cryptoCocksLib.address,
+      CryptoCocksWhitelistingLib: cryptoCocksWhitelistingLib.address,
     },
   });
   const cryptoCocks = (await CryptoCocks.deploy()) as CryptoCocks;
