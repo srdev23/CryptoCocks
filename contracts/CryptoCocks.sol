@@ -22,6 +22,7 @@ contract CryptoCocks is ERC721("CryptoCocks", "CC"), ERC721Enumerable, ERC721URI
         bool publicSaleStatus; // true => active public sale
         bool freeMinting; // true => minting does not require fee
         bool initMint; // true => initMint was not yet executed
+        bool isWhitelistingEnabled; // true => whitelist checks are executed
         uint8 percFee; // int only (e.g., 1/100)
         uint128 minFee; // in Wei
     }
@@ -58,7 +59,7 @@ contract CryptoCocks is ERC721("CryptoCocks", "CC"), ERC721Enumerable, ERC721URI
     address payable public donationWallet;
 
     constructor() {
-        set = Settings(false, true, true, 100, 0.02 ether);
+        set = Settings(false, true, true, true, 100, 0.02 ether);
         bal = Balances(0, 0);
         teamWallet = payable(0x5b1f57449Dd479e787FDF201a59d06D3Cb84F5Dc); //multisig address
         donationWallet = payable(0xb1019Eb5e90aD29C2FcE82AAB712325a1A3d5924); //enter giving block address
@@ -74,7 +75,7 @@ contract CryptoCocks is ERC721("CryptoCocks", "CC"), ERC721Enumerable, ERC721URI
     {
         uint16 newTokenId = uint16(_tokenIdTracker.current() + 31);
         uint value = msg.value;
-        (bool wL, uint8 idx) = whitelist.checkListed(msg.sender);
+        (bool wL, uint8 idx) = set.isWhitelistingEnabled ? whitelist.checkListed(msg.sender) : (false, 0);
 
         // test conditions
         require((set.publicSaleStatus || wL), "LOCK");
@@ -172,6 +173,10 @@ contract CryptoCocks is ERC721("CryptoCocks", "CC"), ERC721Enumerable, ERC721URI
         set.freeMinting = status; // true => minting does not require a fee
         set.percFee = percFee; // percFee, denoted as denominator (i.e., 1/percFee)
         set.minFee = minFee; // minFee, denoted in Wei
+    }
+
+    function changeWhitelistingSettings(bool enabled) external onlyOwner {
+        set.isWhitelistingEnabled = enabled;
     }
 
     function getListContract(uint8 idx) external view returns (CryptoCocksWhitelistingLib.ListContract memory lc) {
