@@ -299,6 +299,33 @@ export async function assertCollectedBalance(
   expect(balances[balanceType]).to.equal(balance);
 }
 
+export interface CommunityTokenHolder {
+  address: string; // wallet address holding a specific community token
+  balance: string; // number of tokens held by the wallet
+}
+
+export interface CommunityTokenHolders {
+  duckdao: CommunityTokenHolder;
+  kryptonauten: CommunityTokenHolder;
+  lobsterdao: CommunityTokenHolder;
+  cyberkongz: CommunityTokenHolder;
+  daomaker: CommunityTokenHolder;
+  neotokyo: CommunityTokenHolder;
+}
+
+export async function assertBalanceOf(
+  cryptoCocks: CryptoCocks,
+  communityContract: string,
+  communityTokenHolder: CommunityTokenHolder
+) {
+  const tx = cryptoCocks.queryBalance(
+    communityContract,
+    communityTokenHolder.address
+  );
+  await expect(tx).to.not.be.reverted;
+  expect(await tx).to.equal(communityTokenHolder.balance);
+}
+
 const cids = [
   "bafybeiesbbihtfdj3kqbah5642p7drsb6hrzwzksezbgb2t2ojjwgh2k5m",
   "bafybeifclnruolpdcsouhmzhnardvpzroxk6qouc53drw4vh2f3zdoouya",
