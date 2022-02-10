@@ -178,7 +178,7 @@ contract CryptoCocks is ERC721("CryptoCocks", "CC"), ERC721Enumerable, ERC721URI
         return whitelist.getListContract(idx);
     }
 
-    function queryBalance(uint8 listIndex, address addressToQuery) public view returns (uint) {
+    function queryBalance(uint8 listIndex, address addressToQuery) external view returns (uint) {
         return whitelist.queryBalance(listIndex, addressToQuery);
     }
 

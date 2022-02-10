@@ -47,7 +47,7 @@ library CryptoCocksWhitelistingLib {
         }
     }
 
-    function checkListed(Whitelist storage self, address account) public view returns (bool, uint8) {
+    function checkListed(Whitelist storage self, address account) external view returns (bool, uint8) {
         for (uint8 i = 0; i < self.numContracts; i++) {
             if ((queryBalance(self, i, account) >= self.lists[i].minBalance) && (self.lists[i].maxSupply > self.lists[i].tracker)) {
                 return (true, i);
@@ -76,7 +76,7 @@ library CryptoCocksWhitelistingLib {
         self.numContracts += 1;
     }
 
-    function popRoyalties(Whitelist storage self, address wallet) public returns(uint128 balance) {
+    function popRoyalties(Whitelist storage self, address wallet) external returns(uint128 balance) {
         bool isCommunityWallet = false;
         uint8 idx = 0;
         for (uint8 i = 0; i < self.numContracts; i++) {
@@ -91,7 +91,7 @@ library CryptoCocksWhitelistingLib {
         self.lists[idx].balance = 0;
     }
 
-    function getListContract(Whitelist storage self, uint8 idx) public view returns (ListContract storage lc) {
+    function getListContract(Whitelist storage self, uint8 idx) external view returns (ListContract storage lc) {
         return self.lists[idx];
     }
 }
