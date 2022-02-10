@@ -27,18 +27,18 @@ This repository contains the solidity contracts powering CryptoCocks.
 
 # Gallery
 <p float="left">
-  <img src="https://www.cryptococks.xyz/landing/cock-gallery/10.png" width="200" alt="CryptoCock 1" />
-  <img src="https://www.cryptococks.xyz/landing/cock-gallery/08.png" width="200" alt="CryptoCock 2" />
-  <img src="https://www.cryptococks.xyz/landing/cock-gallery/11.png" width="200" alt="CryptoCock 3" />
-  <img src="https://www.cryptococks.xyz/landing/cock-gallery/14.png" width="200" alt="CryptoCock 4" />
-  <img src="https://www.cryptococks.xyz/landing/cock-gallery/05.png" width="200" alt="CryptoCock 5" />
-  <img src="https://www.cryptococks.xyz/landing/cock-gallery/24.png" width="200" alt="CryptoCock 6" />
-  <img src="https://www.cryptococks.xyz/landing/cock-gallery/06.png" width="200" alt="CryptoCock 7" />
-  <img src="https://www.cryptococks.xyz/landing/cock-gallery/03.png" width="200" alt="CryptoCock 8" />
-  <img src="https://www.cryptococks.xyz/landing/cock-gallery/09.png" width="200" alt="CryptoCock 9" />
-  <img src="https://www.cryptococks.xyz/cocks/100/20/cock.png" width="200" alt="CryptoCock 10" />
-  <img src="https://www.cryptococks.xyz/cocks/20/20/cock.png" width="200" alt="CryptoCock 11" />
-  <img src="https://www.cryptococks.xyz/cocks/40/18/cock.png" width="200" alt="CryptoCock 12" />
+  <img src="https://storage.googleapis.com/crypto-cocks/svgs/1/11/cock.svg" width="200" alt="CryptoCock 11" />
+  <img src="https://storage.googleapis.com/crypto-cocks/svgs/2/12/cock.svg" width="200" alt="CryptoCock 12" />
+  <img src="https://storage.googleapis.com/crypto-cocks/svgs/3/13/cock.svg" width="200" alt="CryptoCock 13" />
+  <img src="https://storage.googleapis.com/crypto-cocks/svgs/4/14/cock.svg" width="200" alt="CryptoCock 14" />
+  <img src="https://storage.googleapis.com/crypto-cocks/svgs/5/15/cock.svg" width="200" alt="CryptoCock 15" />
+  <img src="https://storage.googleapis.com/crypto-cocks/svgs/6/16/cock.svg" width="200" alt="CryptoCock 16" />
+  <img src="https://storage.googleapis.com/crypto-cocks/svgs/7/17/cock.svg" width="200" alt="CryptoCock 17" />
+  <img src="https://storage.googleapis.com/crypto-cocks/svgs/8/18/cock.svg" width="200" alt="CryptoCock 18" />
+  <img src="https://storage.googleapis.com/crypto-cocks/svgs/9/19/cock.svg" width="200" alt="CryptoCock 19" />
+  <img src="https://storage.googleapis.com/crypto-cocks/svgs/10/20/cock.svg" width="200" alt="CryptoCock 20" />
+  <img src="https://storage.googleapis.com/crypto-cocks/svgs/11/1/cock.svg" width="200" alt="CryptoCock 1" />
+    <img src="https://storage.googleapis.com/crypto-cocks/svgs/11/5/cock.svg" width="200" alt="CryptoCock 5" />
 </p>
 
 
