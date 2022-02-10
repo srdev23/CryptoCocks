@@ -277,7 +277,7 @@ describe("Mint", function () {
   describe("Length Calculation", function () {
     it("should calculate lengths correctly for fixed fee", async () => {
       for (let i = 0; i < 100; i++) {
-        const minter = await getMinter(minters, 0, i, percentileData);
+        const minter = await getMinter(minters, i, percentileData);
         const balance = await minter.getBalance();
         const tx = await mint(contracts.cryptoCocks, minter);
 
@@ -305,7 +305,7 @@ describe("Mint", function () {
           });
         }
 
-        const minter = await getMinter(minters, 1, i, percentileData);
+        const minter = await getMinter(minters, i, percentileData);
         const balance = await minter.getBalance();
         const tx = await mint(contracts.cryptoCocks, minter, percFee);
 
@@ -328,7 +328,7 @@ describe("Mint", function () {
 
     it("should set the token URI correctly", async () => {
       for (let i = 0; i < 100; i++) {
-        const minter = await getMinter(minters, 2, i, percentileData);
+        const minter = await getMinter(minters, i, percentileData);
         await mint(contracts.cryptoCocks, minter);
 
         const tokenId = i + 30 + 1;
@@ -343,7 +343,7 @@ describe("Mint", function () {
 
     it("should calculate lengths correctly for a late initMint", async () => {
       for (let i = 0; i < 100; i++) {
-        const minter = await getMinter(minters, 3, i, percentileData);
+        const minter = await getMinter(minters, i, percentileData);
         await mint(contracts.cryptoCocks, minter);
       }
 
@@ -386,7 +386,7 @@ describe("Mint", function () {
       const numberTokens = 100;
 
       for (let i = 0; i < numberTokens; i++) {
-        const minter = await getMinter(minters, 5, i, percentileData);
+        const minter = await getMinter(minters, i, percentileData);
         const tx = mint(contracts.cryptoCocks, minter);
         const tokenId = i + 31;
         await expect(tx)
