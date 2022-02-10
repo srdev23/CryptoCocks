@@ -299,7 +299,13 @@ export async function assertCollectedBalance(
   expect(balances[balanceType]).to.equal(balance);
 }
 
-const cids = ["b1", "b2", "b3", "b4", "b5"];
+const cids = [
+  "bafybeiesbbihtfdj3kqbah5642p7drsb6hrzwzksezbgb2t2ojjwgh2k5m",
+  "bafybeifclnruolpdcsouhmzhnardvpzroxk6qouc53drw4vh2f3zdoouya",
+  "bafybeihbeszvaoc3exx6ji77g74nyuqmoz2scdykudna3qd6xzgygn36ra",
+  "bafybeidl3uswhq65hnfvgj6bfahbvdb57y7cxiaelgct6q7raweubcms6u",
+  "bafybeifx2hrh6mhbpcivo4z53l76uqwc6fth4nf4qah6aow7e62lcka3d4",
+];
 
 export function getCID(tokenId: number) {
   if (tokenId <= 2000) {
