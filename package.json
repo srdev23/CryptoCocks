@@ -3,6 +3,7 @@
   "version": "0.0.1",
   "scripts": {
     "compile": "hardhat compile",
+    "clean": "hardhat clean",
     "test": "hardhat test",
     "node": "hardhat node",
     "test:no-logs": "HIDE_CONTRACT_LOGS=true hardhat test",
