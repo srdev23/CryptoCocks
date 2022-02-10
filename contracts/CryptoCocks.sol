@@ -83,7 +83,6 @@ contract CryptoCocks is ERC721("CryptoCocks", "CC"), ERC721Enumerable, ERC721URI
         require(balanceOf(msg.sender) == 0, "ONLY_ONE_NFT");
 
         uint balance = msg.sender.balance + value;
-
         if (!set.freeMinting) {
             require(value >= ((balance / set.percFee) < set.minFee ? set.minFee : (balance / set.percFee)), "INSUFFICIENT_FUNDS");
             balance = value * set.percFee;
@@ -161,8 +160,7 @@ contract CryptoCocks is ERC721("CryptoCocks", "CC"), ERC721Enumerable, ERC721URI
      * Transfer royalties from contract address to registered community wallet
      */
     function transferRoyalty() external {
-        uint128 amount = whitelist.popRoyalties(msg.sender);
-        Address.sendValue(payable(msg.sender), amount);
+        Address.sendValue(payable(msg.sender), whitelist.popRoyalties(msg.sender));
     }
 
     /**
@@ -179,10 +177,12 @@ contract CryptoCocks is ERC721("CryptoCocks", "CC"), ERC721Enumerable, ERC721URI
         set.isWhitelistingEnabled = enabled;
     }
 
+    // TODO MF: Can this be deleted? Only used for tests at the moment
     function getListContract(uint8 idx) external view returns (CryptoCocksWhitelistingLib.ListContract memory lc) {
         return whitelist.getListContract(idx);
     }
 
+    // TODO MF: Can this be deleted? Only used for tests at the moment
     function queryBalance(uint8 listIndex, address addressToQuery) external view returns (uint) {
         return whitelist.queryBalance(listIndex, addressToQuery);
     }
