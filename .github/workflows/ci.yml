@@ -19,6 +19,9 @@ jobs:
       - run: npm install
       - run: npm run compile
       - run: npm run coverage
+        env:
+          MNEMONIC: ${{ secrets.MNEMONIC }}
+          MAINNET_URL: ${{ secrets.MAINNET_URL }}
       - uses: codecov/codecov-action@v2
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
