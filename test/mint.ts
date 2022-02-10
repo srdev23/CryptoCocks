@@ -68,7 +68,7 @@ describe("Mint", function () {
         await addWhitelistedContract(
           contracts.cryptoCocks,
           owner,
-          contracts.testTokenOne,
+          contracts.testTokenOne.address,
           signer1,
           maxSupply,
           minBalance,
@@ -81,12 +81,14 @@ describe("Mint", function () {
           signer2,
           contracts.cryptoCocks,
           contracts.testTokenOne,
+          0,
           minBalance // enough balance to be permitted to mint
         );
         await mintTestToken(
           signer3,
           contracts.cryptoCocks,
           contracts.testTokenOne,
+          0,
           minBalance // enough balance to be permitted to mint
         );
 
@@ -139,7 +141,7 @@ describe("Mint", function () {
         await addWhitelistedContract(
           contracts.cryptoCocks,
           owner,
-          contracts.testTokenOne,
+          contracts.testTokenOne.address,
           signer1,
           2,
           minBalanceTokenOne,
@@ -149,7 +151,7 @@ describe("Mint", function () {
         await addWhitelistedContract(
           contracts.cryptoCocks,
           owner,
-          contracts.testTokenTwo,
+          contracts.testTokenTwo.address,
           signer2,
           2,
           minBalanceTokenTwo,
@@ -169,6 +171,7 @@ describe("Mint", function () {
           signerTokenOne,
           contracts.cryptoCocks,
           contracts.testTokenOne,
+          0,
           minBalanceTokenOne
         );
 
@@ -176,6 +179,7 @@ describe("Mint", function () {
           otherSignerTokenOne,
           contracts.cryptoCocks,
           contracts.testTokenOne,
+          0,
           minBalanceTokenOne
         );
 
@@ -183,6 +187,7 @@ describe("Mint", function () {
           signerTokenTwo,
           contracts.cryptoCocks,
           contracts.testTokenTwo,
+          1,
           minBalanceTokenTwo
         );
 
@@ -190,6 +195,7 @@ describe("Mint", function () {
           signerTokenBoth,
           contracts.cryptoCocks,
           contracts.testTokenOne,
+          0,
           minBalanceTokenOne
         );
 
@@ -197,6 +203,7 @@ describe("Mint", function () {
           signerTokenBoth,
           contracts.cryptoCocks,
           contracts.testTokenTwo,
+          1,
           minBalanceTokenTwo
         );
 
@@ -223,6 +230,7 @@ describe("Mint", function () {
           signer3,
           contracts.cryptoCocks,
           contracts.testTokenOne,
+          0,
           minBalanceTokenOne - 1 // not enough balance of the whitelisted token
         );
 

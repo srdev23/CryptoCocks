@@ -91,7 +91,7 @@ export async function getMintValue(signer: Signer, percFee: number = 100) {
  *
  * @param cryptoCocks Deployed CryptoCocks contract
  * @param owner Owner account that deployed the CryptoCocks contract
- * @param testToken TestToken contract
+ * @param tokenContractAddress TestToken contract
  * @param communityWallet Signer
  * @param maxSupply Maximum supply
  * @param minBalance Minimum balance
@@ -101,30 +101,94 @@ export async function getMintValue(signer: Signer, percFee: number = 100) {
 export async function addWhitelistedContract(
   cryptoCocks: CryptoCocks,
   owner: Signer,
-  testToken: TestToken,
+  tokenContractAddress: string,
   communityWallet: SignerWithAddress,
   maxSupply: number,
   minBalance: number,
   percRoyal: number,
   revert: boolean = false
 ) {
-  const cc = testToken.address;
+  await _addWhitelistedContract(
+    cryptoCocks,
+    owner,
+    tokenContractAddress,
+    communityWallet,
+    maxSupply,
+    minBalance,
+    percRoyal,
+    revert
+  );
+}
+
+export async function addWhitelistedERC1155Contract(
+  cryptoCocks: CryptoCocks,
+  owner: Signer,
+  tokenContractAddress: string,
+  erc1155Id: BigNumber,
+  communityWallet: SignerWithAddress,
+  maxSupply: number,
+  minBalance: number,
+  percRoyal: number
+) {
+  await _addWhitelistedContract(
+    cryptoCocks,
+    owner,
+    tokenContractAddress,
+    communityWallet,
+    maxSupply,
+    minBalance,
+    percRoyal,
+    false,
+    erc1155Id
+  );
+}
+
+async function _addWhitelistedContract(
+  cryptoCocks: CryptoCocks,
+  owner: Signer,
+  tokenContractAddress: string,
+  communityWallet: SignerWithAddress,
+  maxSupply: number,
+  minBalance: number,
+  percRoyal: number,
+  revert: boolean,
+  erc1155Id?: BigNumber
+) {
+  const cc = tokenContractAddress;
   const wallet = communityWallet.address;
 
   const initialSettings = await cryptoCocks.set();
   const initialNumContracts = initialSettings.numContracts;
 
+  const isERC1155 = !!erc1155Id;
+
   if (revert) {
     await expect(
       cryptoCocks
         .connect(owner)
-        .addWhiteListing(cc, wallet, maxSupply, minBalance, percRoyal)
+        .addWhiteListing(
+          isERC1155,
+          cc,
+          wallet,
+          maxSupply,
+          minBalance,
+          percRoyal,
+          erc1155Id ?? 0
+        )
     ).to.be.reverted;
   } else {
     await expect(
       cryptoCocks
         .connect(owner)
-        .addWhiteListing(cc, wallet, maxSupply, minBalance, percRoyal)
+        .addWhiteListing(
+          isERC1155,
+          cc,
+          wallet,
+          maxSupply,
+          minBalance,
+          percRoyal,
+          erc1155Id ?? 0
+        )
     ).to.not.be.reverted;
 
     const settings = await cryptoCocks.set();
@@ -137,7 +201,7 @@ export async function addWhitelistedContract(
     expect(whiteListed.minBalance).to.equal(minBalance);
     expect(whiteListed.tracker).to.equal(0);
     expect(whiteListed.balance.toNumber()).to.equal(0);
-    expect(whiteListed.cc).to.equal(testToken.address);
+    expect(whiteListed.cc.toUpperCase()).to.equal(cc.toUpperCase());
     expect(whiteListed.wallet).to.equal(communityWallet.address);
   }
 }
@@ -149,12 +213,14 @@ export async function addWhitelistedContract(
  * @param signer Wallet that receives the test tokens
  * @param cryptoCocks Deployed CryptoCocks contract
  * @param testToken Deployed TestToken contract
+ * @param listIndex Index in list of whitelisted contracts
  * @param times Number of tokens given to the signer
  */
 export async function mintTestToken(
   signer: SignerWithAddress,
   cryptoCocks: CryptoCocks,
   testToken: TestToken,
+  listIndex: number,
   times: number
 ) {
   const receiptPromises = [...Array(times)].map(async () => {
@@ -162,10 +228,7 @@ export async function mintTestToken(
   });
   // wait for all transactions and then assert balance
   Promise.all(receiptPromises).then(async () => {
-    const balance = await cryptoCocks.queryBalance(
-      testToken.address,
-      signer.address
-    );
+    const balance = await cryptoCocks.queryBalance(listIndex, signer.address);
     expect(balance).to.equal(BigNumber.from(times));
   });
 }
@@ -316,13 +379,10 @@ export interface CommunityTokenHolders {
 
 export async function assertBalanceOf(
   cryptoCocks: CryptoCocks,
-  communityContract: string,
+  listIndex: number,
   communityTokenHolder: CommunityTokenHolder
 ) {
-  const tx = cryptoCocks.queryBalance(
-    communityContract,
-    communityTokenHolder.address
-  );
+  const tx = cryptoCocks.queryBalance(listIndex, communityTokenHolder.address);
   await expect(tx).to.not.be.reverted;
   expect(await tx).to.equal(communityTokenHolder.balance);
 }

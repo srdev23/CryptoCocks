@@ -33,6 +33,7 @@ const config: HardhatUserConfig = {
         url: process.env.MAINNET_URL || "",
         blockNumber: 14177424,
       },
+      allowUnlimitedContractSize: true,
     },
     ropsten: {
       url: process.env.ROPSTEN_URL || "",

@@ -107,7 +107,7 @@ describe("Transfers", function () {
       await addWhitelistedContract(
         contracts.cryptoCocks,
         owner,
-        communityToken,
+        communityToken.address,
         communityWallet,
         maxSupply,
         minBalance,
@@ -118,6 +118,7 @@ describe("Transfers", function () {
         communityTokenHolder,
         contracts.cryptoCocks,
         contracts.testTokenOne,
+        0,
         minBalance
       );
     });

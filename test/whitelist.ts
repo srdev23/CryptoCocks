@@ -8,11 +8,13 @@ import {
 } from "./deploy";
 import {
   addWhitelistedContract,
+  addWhitelistedERC1155Contract,
   assertBalanceOf,
   CommunityTokenHolders,
   // eslint-disable-next-line node/no-missing-import
 } from "./helper";
 import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
+import { BigNumber } from "ethers";
 
 describe("Whitelist", function () {
   let contracts: Contracts;
@@ -37,7 +39,7 @@ describe("Whitelist", function () {
       await addWhitelistedContract(
         contracts.cryptoCocks,
         owner,
-        testToken,
+        testToken.address,
         communityWallet,
         maxSupply,
         minBalance,
@@ -57,7 +59,15 @@ describe("Whitelist", function () {
       await expect(
         contracts.cryptoCocks
           .connect(nonOwner)
-          .addWhiteListing(cc, wallet, maxSupply, minBalance, percRoyal)
+          .addWhiteListing(
+            false,
+            cc,
+            wallet,
+            maxSupply,
+            minBalance,
+            percRoyal,
+            0
+          )
       ).to.be.reverted;
     });
 
@@ -70,7 +80,7 @@ describe("Whitelist", function () {
         await addWhitelistedContract(
           contracts.cryptoCocks,
           owner,
-          testToken,
+          testToken.address,
           communityWallet,
           2,
           100,
@@ -95,7 +105,7 @@ describe("Whitelist", function () {
         await addWhitelistedContract(
           contracts.cryptoCocks,
           owner,
-          testToken,
+          testToken.address,
           communityWallet,
           2,
           100,
@@ -143,10 +153,108 @@ describe("Whitelist", function () {
       },
     };
 
+    const MAX_SUPPLY = {
+      kryptonauten: 400,
+      duckdao: 250,
+      lobsterdao: 150,
+      cyberkongz: 100,
+      daomaker: 50,
+      neotokyo: 20,
+    };
+
+    const MIN_BALANCE = {
+      kryptonauten: 1,
+      duckdao: 100,
+      lobsterdao: 1,
+      cyberkongz: 5,
+      daomaker: 300,
+      neotokyo: 1,
+    };
+
+    const PERC_ROYAL = {
+      kryptonauten: 10,
+      duckdao: 5,
+      lobsterdao: 3,
+      cyberkongz: 2,
+      daomaker: 0,
+      neotokyo: 0,
+    };
+
+    beforeEach(async () => {
+      // Krymptonauten
+      await addWhitelistedERC1155Contract(
+        contracts.cryptoCocks,
+        owner,
+        COMMUNITY_CONTRACTS.kryptonauten,
+        BigNumber.from(
+          "0x043dd28dedaf4209e7aa7ed460e2a45e0915b7eb000000000000000000000001"
+        ),
+        signer1,
+        MAX_SUPPLY.kryptonauten,
+        MIN_BALANCE.kryptonauten,
+        PERC_ROYAL.kryptonauten
+      );
+
+      // Duck DAO
+      await addWhitelistedContract(
+        contracts.cryptoCocks,
+        owner,
+        COMMUNITY_CONTRACTS.duckdao,
+        signer1,
+        MAX_SUPPLY.duckdao,
+        MIN_BALANCE.duckdao,
+        PERC_ROYAL.duckdao
+      );
+
+      // Lobster DAO
+      await addWhitelistedContract(
+        contracts.cryptoCocks,
+        owner,
+        COMMUNITY_CONTRACTS.lobsterdao,
+        signer1,
+        MAX_SUPPLY.lobsterdao,
+        MIN_BALANCE.lobsterdao,
+        PERC_ROYAL.lobsterdao
+      );
+
+      // CyberKongz
+      await addWhitelistedContract(
+        contracts.cryptoCocks,
+        owner,
+        COMMUNITY_CONTRACTS.cyberkongz,
+        signer1,
+        MAX_SUPPLY.cyberkongz,
+        MIN_BALANCE.cyberkongz,
+        PERC_ROYAL.cyberkongz
+      );
+
+      // DAO Maker
+      await addWhitelistedContract(
+        contracts.cryptoCocks,
+        owner,
+        COMMUNITY_CONTRACTS.daomaker,
+        signer1,
+        MAX_SUPPLY.daomaker,
+        MIN_BALANCE.daomaker,
+        PERC_ROYAL.daomaker
+      );
+
+      // NeoTokyo
+      await addWhitelistedContract(
+        contracts.cryptoCocks,
+        owner,
+        COMMUNITY_CONTRACTS.neotokyo,
+        signer1,
+        MAX_SUPPLY.neotokyo,
+        MIN_BALANCE.neotokyo,
+        PERC_ROYAL.neotokyo
+      );
+    });
+
     it("should be possible to receive balance of CCKN tokens", async () => {
       await assertBalanceOf(
         contracts.cryptoCocks,
-        COMMUNITY_CONTRACTS.kryptonauten,
+        0,
         COMMUNITY_TOKEN_HOLDERS.kryptonauten
       );
     });
@@ -154,7 +262,7 @@ describe("Whitelist", function () {
     it("should be possible to receive balance of DDIM tokens", async () => {
       await assertBalanceOf(
         contracts.cryptoCocks,
-        COMMUNITY_CONTRACTS.duckdao,
+        1,
         COMMUNITY_TOKEN_HOLDERS.duckdao
       );
     });
@@ -162,7 +270,7 @@ describe("Whitelist", function () {
     it("should be possible to receive balance of LOBS tokens", async () => {
       await assertBalanceOf(
         contracts.cryptoCocks,
-        COMMUNITY_CONTRACTS.lobsterdao,
+        2,
         COMMUNITY_TOKEN_HOLDERS.lobsterdao
       );
     });
@@ -170,7 +278,7 @@ describe("Whitelist", function () {
     it("should be possible to receive balance of KONGZ tokens", async () => {
       await assertBalanceOf(
         contracts.cryptoCocks,
-        COMMUNITY_CONTRACTS.cyberkongz,
+        3,
         COMMUNITY_TOKEN_HOLDERS.cyberkongz
       );
     });
@@ -178,7 +286,7 @@ describe("Whitelist", function () {
     it("should be possible to receive balance of DAO tokens", async () => {
       await assertBalanceOf(
         contracts.cryptoCocks,
-        COMMUNITY_CONTRACTS.daomaker,
+        4,
         COMMUNITY_TOKEN_HOLDERS.daomaker
       );
     });
@@ -186,7 +294,7 @@ describe("Whitelist", function () {
     it("should be possible to receive balance of NTCTZN tokens", async () => {
       await assertBalanceOf(
         contracts.cryptoCocks,
-        COMMUNITY_CONTRACTS.neotokyo,
+        5,
         COMMUNITY_TOKEN_HOLDERS.neotokyo
       );
     });

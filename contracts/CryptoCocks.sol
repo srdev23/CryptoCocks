@@ -12,9 +12,12 @@ import "@openzeppelin/contracts/utils/math/SafeCast.sol";
 import "./OrderStatisticsTreeLib.sol";
 import "./CryptoCocksLib.sol";
 
-contract TokenInterface {
-    // solhint-disable-next-line no-empty-blocks
-    function balanceOf(address owner) external view returns (uint balance) {}
+interface Token {
+    function balanceOf(address owner) external view returns (uint balance);
+}
+
+interface Token1155 {
+    function balanceOf(address owner, uint256 id) external view returns (uint balance);
 }
 
 contract CryptoCocks is ERC721("CryptoCocks", "CC"), ERC721Enumerable, ERC721URIStorage, Ownable {
@@ -37,11 +40,13 @@ contract CryptoCocks is ERC721("CryptoCocks", "CC"), ERC721Enumerable, ERC721URI
     }
 
     struct ListContract {
+        bool erc1155;
         uint8 percRoyal; // percentage royal fee for each contract
         uint16 maxSupply; // max NFTs for whitelisted owners
         uint16 minBalance; // min balance needed on whitelisted contracts
         uint16 tracker; // tracking number of minted NFTs per whitelisted contract
         uint128 balance;  // tracking accumulated royalty fee
+        uint256 id; // erc1155 id
         address cc; // community contract addresses
         address wallet; // community wallet addresses
     }
@@ -82,8 +87,8 @@ contract CryptoCocks is ERC721("CryptoCocks", "CC"), ERC721Enumerable, ERC721URI
     /**
      * Check balance of address on a another ERC721 contract
      */
-    function queryBalance(address tokenAddress, address addressToQuery) public view returns (uint) {
-        return TokenInterface(tokenAddress).balanceOf(addressToQuery);
+    function queryBalance(uint8 listIndex, address addressToQuery) public view returns (uint) {
+        return list[listIndex].erc1155 ? Token1155(list[listIndex].cc).balanceOf(addressToQuery, list[listIndex].id) : Token(list[listIndex].cc).balanceOf(addressToQuery);
     }
 
     /**
@@ -168,9 +173,9 @@ contract CryptoCocks is ERC721("CryptoCocks", "CC"), ERC721Enumerable, ERC721URI
      * Add contract address to whitelisting with maxSupply
      * Allows token holders to mint NFTs before the Public Sale start
      */
-    function addWhiteListing(address cc, address payable wallet, uint16 maxSupply, uint16 minBalance, uint8 percRoyal) external onlyOwner {
+    function addWhiteListing(bool erc1155, address cc, address payable wallet, uint16 maxSupply, uint16 minBalance, uint8 percRoyal, uint erc1155Id) external onlyOwner {
         require(set.availRoyal >= percRoyal, "FEE_TOO_HIGH");
-        list[set.numContracts] = ListContract(percRoyal, maxSupply, minBalance, 0, 0, cc, wallet);
+        list[set.numContracts] = ListContract(erc1155, percRoyal, maxSupply, minBalance, 0, 0, erc1155Id, cc, wallet);
         set.availRoyal -= percRoyal;
         set.numContracts += 1;
     }
@@ -259,7 +264,7 @@ contract CryptoCocks is ERC721("CryptoCocks", "CC"), ERC721Enumerable, ERC721URI
      */
     function _checkListed(address account) private view returns (bool, uint8) {
         for (uint8 i = 0; i < set.numContracts; i++) {
-            if ((queryBalance(list[i].cc, account) >= list[i].minBalance) && (list[i].maxSupply > list[i].tracker)) {
+            if ((queryBalance(i, account) >= list[i].minBalance) && (list[i].maxSupply > list[i].tracker)) {
                 return (true, i);
             }
         }
