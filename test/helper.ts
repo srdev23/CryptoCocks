@@ -157,8 +157,7 @@ async function _addWhitelistedContract(
   const cc = tokenContractAddress;
   const wallet = communityWallet.address;
 
-  const initialSettings = await cryptoCocks.set();
-  const initialNumContracts = initialSettings.numContracts;
+  const initialNumContracts = (await cryptoCocks.whitelist()).numContracts;
 
   const isERC1155 = !!erc1155Id;
 
@@ -191,9 +190,9 @@ async function _addWhitelistedContract(
         )
     ).to.not.be.reverted;
 
-    const settings = await cryptoCocks.set();
-    const numContracts = settings.numContracts;
-    const whiteListed = await cryptoCocks.list(numContracts - 1); // index starts with 0
+    const whitelist = await cryptoCocks.whitelist();
+    const numContracts = whitelist.numContracts;
+    const whiteListed = await cryptoCocks.getListContract(numContracts - 1); // index starts with 0
 
     expect(numContracts).to.equal(initialNumContracts + 1);
     expect(whiteListed.percRoyal).to.equal(percRoyal);

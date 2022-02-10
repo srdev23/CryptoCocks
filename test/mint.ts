@@ -96,7 +96,7 @@ describe("Mint", function () {
         await mintRevert(contracts.cryptoCocks, signer3);
 
         // tracks the number of minted tokens for TestTokenOne
-        const contract = await contracts.cryptoCocks.list(0);
+        const contract = await contracts.cryptoCocks.getListContract(0);
         expect(contract.tracker).to.equal(1);
       });
     });
@@ -217,11 +217,11 @@ describe("Mint", function () {
         }
 
         // tracks the number of minted tokens for TestTokenOne
-        const contract1 = await contracts.cryptoCocks.list(0);
+        const contract1 = await contracts.cryptoCocks.getListContract(0);
         expect(contract1.tracker).to.equal(2);
 
         // tracks the number of minted tokens for TestTokenTwo
-        const contract2 = await contracts.cryptoCocks.list(1);
+        const contract2 = await contracts.cryptoCocks.getListContract(1);
         expect(contract2.tracker).to.equal(2);
       });
 
@@ -237,7 +237,7 @@ describe("Mint", function () {
         await mintRevert(contracts.cryptoCocks, signer3);
 
         // tracks the number of minted tokens for TestTokenOne
-        const contract1 = await contracts.cryptoCocks.list(0);
+        const contract1 = await contracts.cryptoCocks.getListContract(0);
         expect(contract1.tracker).to.equal(0);
       });
     });

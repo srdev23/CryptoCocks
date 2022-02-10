@@ -37,11 +37,19 @@ export async function deployContracts(signer: Signer) {
   const cryptoCocksLib = await CryptoCocksLib.deploy();
   await cryptoCocksLib.deployed();
 
+  const CryptoCocksWhitelistingLib = await ethers.getContractFactory(
+    "CryptoCocksWhitelistingLib",
+    signer
+  );
+  const cryptoCocksWhitelistingLib = await CryptoCocksWhitelistingLib.deploy();
+  await cryptoCocksWhitelistingLib.deployed();
+
   // deploy crypto cocks contract
   const CryptoCocks = await ethers.getContractFactory("CryptoCocks", {
     libraries: {
       OrderStatisticsTreeLib: orderStatisticsTreeLib.address,
       CryptoCocksLib: cryptoCocksLib.address,
+      CryptoCocksWhitelistingLib: cryptoCocksWhitelistingLib.address,
     },
     signer,
   });
