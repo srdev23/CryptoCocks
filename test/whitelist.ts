@@ -40,6 +40,7 @@ describe("Whitelist", function () {
         contracts.cryptoCocks,
         owner,
         testToken.address,
+        0,
         communityWallet,
         maxSupply,
         minBalance,
@@ -60,6 +61,7 @@ describe("Whitelist", function () {
         contracts.cryptoCocks
           .connect(nonOwner)
           .addWhiteListing(
+            0,
             false,
             cc,
             wallet,
@@ -76,16 +78,19 @@ describe("Whitelist", function () {
       const communityWallet = signer1;
       const testToken = contracts.testTokenOne;
 
+      let index = 0;
       for (const percRoyal of percRoyals) {
         await addWhitelistedContract(
           contracts.cryptoCocks,
           owner,
           testToken.address,
+          index,
           communityWallet,
           2,
           100,
           percRoyal
         );
+        index++;
       }
     });
 
@@ -106,6 +111,7 @@ describe("Whitelist", function () {
           contracts.cryptoCocks,
           owner,
           testToken.address,
+          index,
           communityWallet,
           2,
           100,
@@ -186,6 +192,7 @@ describe("Whitelist", function () {
         contracts.cryptoCocks,
         owner,
         COMMUNITY_CONTRACTS.kryptonauten,
+        0,
         BigNumber.from(
           "0x043dd28dedaf4209e7aa7ed460e2a45e0915b7eb000000000000000000000001"
         ),
@@ -200,6 +207,7 @@ describe("Whitelist", function () {
         contracts.cryptoCocks,
         owner,
         COMMUNITY_CONTRACTS.duckdao,
+        1,
         signer1,
         MAX_SUPPLY.duckdao,
         MIN_BALANCE.duckdao,
@@ -211,6 +219,7 @@ describe("Whitelist", function () {
         contracts.cryptoCocks,
         owner,
         COMMUNITY_CONTRACTS.lobsterdao,
+        2,
         signer1,
         MAX_SUPPLY.lobsterdao,
         MIN_BALANCE.lobsterdao,
@@ -222,6 +231,7 @@ describe("Whitelist", function () {
         contracts.cryptoCocks,
         owner,
         COMMUNITY_CONTRACTS.cyberkongz,
+        3,
         signer1,
         MAX_SUPPLY.cyberkongz,
         MIN_BALANCE.cyberkongz,
@@ -233,6 +243,7 @@ describe("Whitelist", function () {
         contracts.cryptoCocks,
         owner,
         COMMUNITY_CONTRACTS.daomaker,
+        4,
         signer1,
         MAX_SUPPLY.daomaker,
         MIN_BALANCE.daomaker,
@@ -244,6 +255,7 @@ describe("Whitelist", function () {
         contracts.cryptoCocks,
         owner,
         COMMUNITY_CONTRACTS.neotokyo,
+        5,
         signer1,
         MAX_SUPPLY.neotokyo,
         MIN_BALANCE.neotokyo,

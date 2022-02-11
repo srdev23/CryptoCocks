@@ -1,6 +1,8 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.7;
 
+import "@openzeppelin/contracts/utils/math/SafeCast.sol";
+
 interface Token {
     function balanceOf(address owner) external view returns (uint balance);
 }
@@ -14,7 +16,7 @@ library CryptoCocksWhitelistingLib {
 
     struct ListContract {
         bool erc1155;
-        uint256 id;
+        uint8 id;
         uint8 percRoyal; // percentage royal fee for each contract
         uint16 maxSupply; // max NFTs for whitelisted owners
         uint16 minBalance; // min balance needed on whitelisted contracts
@@ -30,7 +32,7 @@ library CryptoCocksWhitelistingLib {
         ListContract[] _values;
         // Position of the value in the `values` array, plus 1 because index 0
         // means a value is not in the set.
-        mapping(uint256 => uint256) _indexes; // Unique ListContract Identifier to Index
+        mapping(uint8 => uint8) _indexes; // Unique ListContract Identifier to Index
     }
 
     struct Whitelist {
@@ -47,9 +49,7 @@ library CryptoCocksWhitelistingLib {
     function add(Whitelist storage self, ListContract memory lc) private returns (bool) {
         if (!contains(self, lc.id)) {
             self.lists._values.push(lc);
-            // The value is stored at length-1, but we add 1 to all indexes
-            // and use 0 as a sentinel value
-            self.lists._indexes[lc.id] = self.lists._values.length;
+            self.lists._indexes[lc.id] = SafeCast.toUint8(self.lists._values.length);
             return true;
         } else {
             return false;
@@ -57,38 +57,37 @@ library CryptoCocksWhitelistingLib {
     }
 
     /**
-     * @dev Removes a value from a set. O(1).
+     * @dev Removes a ListContract by id. O(1).
      *
      * Returns true if the value was removed from the set, that is if it was
      * present.
      */
-    function remove(Whitelist storage self, ListContract storage lc) private returns (bool) {
+    function remove(Whitelist storage self, uint8 lcId) private returns (bool) {
         // We read and store the value's index to prevent multiple reads from the same storage slot
-        uint256 valueIndex = self.lists._indexes[lc.id];
+        uint8 listContractIndex = self.lists._indexes[lcId];
 
-        if (valueIndex != 0) {
-            // Equivalent to contains(set, value)
+        if (listContractIndex != 0) {
             // To delete an element from the _values array in O(1), we swap the element to delete with the last one in
             // the array, and then remove the last element (sometimes called as 'swap and pop').
-            // This modifies the order of the array, as noted in {at}.
+            // This modifies the order of the array.
 
-            uint256 toDeleteIndex = valueIndex - 1;
-            uint256 lastIndex = self.lists._values.length - 1;
+            uint8 toDeleteIndex = listContractIndex - 1;
+            uint8 lastIndex = SafeCast.toUint8(self.lists._values.length - 1);
 
             if (lastIndex != toDeleteIndex) {
-                ListContract storage lastvalue = self.lists._values[lastIndex];
+                ListContract storage lastListContract = self.lists._values[lastIndex];
 
-                // Move the last value to the index where the value to delete is
-                self.lists._values[toDeleteIndex] = lastvalue;
-                // Update the index for the moved value
-                self.lists._indexes[lastvalue.id] = valueIndex; // Replace lastvalue's index to valueIndex
+                // Move the last ListContract to the index where the value to delete is
+                self.lists._values[toDeleteIndex] = lastListContract;
+                // Update the index for the moved ListContract
+                self.lists._indexes[lastListContract.id] = listContractIndex; // Replace lastListContract's index to listContractIndex
             }
 
-            // Delete the slot where the moved value was stored
+            // Delete the slot where the moved ListContract was stored
             self.lists._values.pop();
 
             // Delete the index for the deleted slot
-            delete self.lists._indexes[lc.id];
+            delete self.lists._indexes[lcId];
 
             return true;
         } else {
@@ -99,15 +98,15 @@ library CryptoCocksWhitelistingLib {
     /**
      * @dev Returns true if the list contract with an identifier is already in the set. O(1).
      */
-    function contains(Whitelist storage self, uint256 id) private view returns (bool) {
+    function contains(Whitelist storage self, uint8 id) private view returns (bool) {
         return self.lists._indexes[id] != 0;
     }
 
     /**
      * @dev Returns the number of values on the set. O(1).
      */
-    function length(Whitelist storage self) private view returns (uint256) {
-        return self.lists._values.length;
+    function length(Whitelist storage self) private view returns (uint8) {
+        return SafeCast.toUint8(self.lists._values.length);
     }
 
     /**
@@ -120,47 +119,35 @@ library CryptoCocksWhitelistingLib {
      *
      * - `index` must be strictly less than {length}.
      */
-    function at(Whitelist storage self, uint256 index) private view returns (ListContract storage) {
+    function at(Whitelist storage self, uint8 index) private view returns (ListContract storage) {
         return self.lists._values[index];
-    }
-
-    /**
-     * @dev Return the entire set in an array
-     *
-     * WARNING: This operation will copy the entire storage to memory, which can be quite expensive. This is designed
-     * to mostly be used by view accessors that are queried without any gas fees. Developers should keep in mind that
-     * this function has an unbounded cost, and using it as part of a state-changing function may render the function
-     * uncallable if the set grows to a point where copying to memory consumes too much gas to fit in a block.
-     */
-    function values(Whitelist storage self) private view returns (ListContract[] memory) {
-        return self.lists._values;
     }
 
     /**
      * Check token balance of address on an ERC721, ERC20 or ERC1155 contract
      */
     function queryBalance(Whitelist storage self, uint8 listIndex, address addressToQuery) public view returns (uint) {
-        ListContract storage lc = at(self, uint256(listIndex));
+        ListContract storage lc = at(self, listIndex);
         return lc.erc1155 ? Token1155(lc.cc).balanceOf(addressToQuery, lc.erc1155Id) : Token(lc.cc).balanceOf(addressToQuery);
     }
 
     function increaseSupply(Whitelist storage self, uint8 idx) public {
-        ListContract storage lc = at(self, uint256(idx));
+        ListContract storage lc = at(self, idx);
         lc.tracker += 1;
     }
 
     function depositRoyalties(Whitelist storage self, uint128 value) public {
-        for (uint256 idx = 0; (idx < length(self)); idx++) {
+        for (uint8 idx = 0; (idx < length(self)); idx++) {
             ListContract storage lc = at(self, idx);
             lc.balance += uint128((value * lc.percRoyal) / 100);
         }
     }
 
     function checkListed(Whitelist storage self, address account) external view returns (bool, uint8) {
-        for (uint256 i = 0; (i < length(self)); i++) {
+        for (uint8 i = 0; (i < length(self)); i++) {
             ListContract storage lc = at(self, i);
-            if ((queryBalance(self, uint8(i), account) >= lc.minBalance) && (lc.maxSupply > lc.tracker)) {
-                return (true, uint8(i));
+            if ((queryBalance(self, i, account) >= lc.minBalance) && (lc.maxSupply > lc.tracker)) {
+                return (true, i);
             }
         }
         return (false, 0);
@@ -172,6 +159,7 @@ library CryptoCocksWhitelistingLib {
      */
     function addContract(
         Whitelist storage self,
+        uint8 id,
         bool erc1155,
         address cc,
         address payable wallet,
@@ -181,25 +169,20 @@ library CryptoCocksWhitelistingLib {
         uint erc1155Id
     ) public {
         require((MAX_PERC_ROYALTIES - self.usedRoyal) >= percRoyal, "FEE_TOO_HIGH");
-        add(self, ListContract(erc1155, 1, percRoyal, maxSupply, minBalance, 0, 0, erc1155Id, cc, wallet));
+        add(self, ListContract(erc1155, id, percRoyal, maxSupply, minBalance, 0, 0, erc1155Id, cc, wallet));
         self.usedRoyal += percRoyal;
     }
 
     function popRoyalties(Whitelist storage self, address wallet) external returns(uint128 balance) {
-        bool isCommunityWallet = false;
-        uint256 idx = 0;
-        for (uint256 i = 0; (i < length(self)); i++) {
+        for (uint8 i = 0; (i < length(self)); i++) {
             ListContract storage lc = at(self, i);
             if (lc.wallet == wallet) {
-                isCommunityWallet = true;
-                idx = i;
-                break;
+                uint128 lcBalance = lc.balance;
+                lc.balance = 0;
+                return lcBalance;
             }
         }
-        require(isCommunityWallet, "NO_COMMUNITY_WALLET");
-        ListContract storage lcFound = at(self, idx);
-        balance = lcFound.balance;
-        lcFound.balance = 0;
+        revert("NO_COMMUNITY_WALLET");
     }
 
     function getListContract(Whitelist storage self, uint8 idx) external view returns (ListContract storage lc) {

@@ -145,6 +145,7 @@ contract CryptoCocks is ERC721("CryptoCocks", "CC"), ERC721Enumerable, ERC721URI
      * Allows token holders to mint NFTs before the Public Sale start
      */
     function addWhiteListing(
+        uint8 id,
         bool erc1155,
         address cc,
         address payable wallet,
@@ -153,7 +154,7 @@ contract CryptoCocks is ERC721("CryptoCocks", "CC"), ERC721Enumerable, ERC721URI
         uint8 percRoyal,
         uint erc1155Id
     ) external onlyOwner {
-        whitelist.addContract(erc1155, cc, wallet, maxSupply, minBalance, percRoyal, erc1155Id);
+        whitelist.addContract(id, erc1155, cc, wallet, maxSupply, minBalance, percRoyal, erc1155Id);
     }
 
     /**
@@ -177,12 +178,10 @@ contract CryptoCocks is ERC721("CryptoCocks", "CC"), ERC721Enumerable, ERC721URI
         set.isWhitelistingEnabled = enabled;
     }
 
-    // TODO MF: Can this be deleted? Only used for tests at the moment
     function getListContract(uint8 idx) external view returns (CryptoCocksWhitelistingLib.ListContract memory lc) {
         return whitelist.getListContract(idx);
     }
 
-    // TODO MF: Can this be deleted? Only used for tests at the moment
     function queryBalance(uint8 listIndex, address addressToQuery) external view returns (uint) {
         return whitelist.queryBalance(listIndex, addressToQuery);
     }
