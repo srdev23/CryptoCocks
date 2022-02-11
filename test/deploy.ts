@@ -11,6 +11,9 @@ import { BigNumber, Signer } from "ethers";
 // eslint-disable-next-line node/no-missing-import
 import { setBalance } from "./helper";
 
+import * as dotenv from "dotenv";
+dotenv.config();
+
 export interface Contracts {
   cryptoCocks: CryptoCocks;
   testTokenOne: TestToken;
@@ -44,11 +47,18 @@ export async function deployContracts(signer: Signer) {
   const cryptoCocksWhitelistingLib = await CryptoCocksWhitelistingLib.deploy();
   await cryptoCocksWhitelistingLib.deployed();
 
+  const cryptoCocksLibAddress = process.env.USE_DEPLOYED
+    ? "0xf31E24AeD8eB6Dd2218683B0bCE29Ed3387b16B9"
+    : cryptoCocksLib.address;
+  const orderStatisticsTreeLibAddress = process.env.USE_DEPLOYED
+    ? "0x0A78bB5c3F3Bf99f78c2D440f2C10712Ce413109"
+    : orderStatisticsTreeLib.address;
+
   // deploy crypto cocks contract
   const CryptoCocks = await ethers.getContractFactory("CryptoCocks", {
     libraries: {
-      OrderStatisticsTreeLib: orderStatisticsTreeLib.address,
-      CryptoCocksLib: cryptoCocksLib.address,
+      OrderStatisticsTreeLib: orderStatisticsTreeLibAddress,
+      CryptoCocksLib: cryptoCocksLibAddress,
       CryptoCocksWhitelistingLib: cryptoCocksWhitelistingLib.address,
     },
     signer,
