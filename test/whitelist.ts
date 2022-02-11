@@ -133,7 +133,8 @@ describe("Whitelist", function () {
   });
 
   describe("Remove Contracts", function () {
-    const listContractId = 0;
+    const listContractId1 = 0;
+    const listContractId2 = 1;
 
     beforeEach(async () => {
       const communityWallet = signer1;
@@ -143,7 +144,18 @@ describe("Whitelist", function () {
         contracts.cryptoCocks,
         owner,
         testToken.address,
-        listContractId,
+        listContractId1,
+        communityWallet,
+        2,
+        100,
+        10
+      );
+
+      await addWhitelistedContract(
+        contracts.cryptoCocks,
+        owner,
+        testToken.address,
+        listContractId2,
         communityWallet,
         2,
         100,
@@ -152,21 +164,28 @@ describe("Whitelist", function () {
     });
 
     it("should be possible to remove a contract", async () => {
-      await assertListContract(contracts.cryptoCocks, listContractId);
-      const tx = contracts.cryptoCocks
+      await assertListContract(contracts.cryptoCocks, listContractId1);
+      const tx1 = contracts.cryptoCocks
         .connect(owner)
-        .removeWhitelisting(listContractId);
-      await expect(tx).to.not.be.reverted;
-      await assertListContract(contracts.cryptoCocks, listContractId, false);
+        .removeWhitelisting(listContractId1);
+      await expect(tx1).to.not.be.reverted;
+      await assertListContract(contracts.cryptoCocks, listContractId1, false);
+
+      await assertListContract(contracts.cryptoCocks, listContractId2);
+      const tx2 = contracts.cryptoCocks
+        .connect(owner)
+        .removeWhitelisting(listContractId2);
+      await expect(tx2).to.not.be.reverted;
+      await assertListContract(contracts.cryptoCocks, listContractId2, false);
     });
 
     it("should be possible to remove a contract by owner only", async () => {
-      await assertListContract(contracts.cryptoCocks, listContractId);
+      await assertListContract(contracts.cryptoCocks, listContractId1);
       const tx = contracts.cryptoCocks
         .connect(nonOwner)
-        .removeWhitelisting(listContractId);
+        .removeWhitelisting(listContractId1);
       await expect(tx).to.be.reverted;
-      await assertListContract(contracts.cryptoCocks, listContractId);
+      await assertListContract(contracts.cryptoCocks, listContractId1);
     });
   });
 
