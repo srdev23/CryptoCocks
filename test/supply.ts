@@ -1,6 +1,4 @@
-// import { expect } from "chai";
 import { ethers } from "hardhat";
-// eslint-disable-next-line node/no-missing-import
 import { Contracts, deploy } from "./deploy";
 import {
   expectToken,
@@ -8,9 +6,7 @@ import {
   setContractToPublicSale,
   getMinter,
   mintRevert,
-  // eslint-disable-next-line node/no-missing-import
 } from "./helper";
-// eslint-disable-next-line node/no-missing-import
 import { loadPercentileData, PercentileDataEntry } from "./percentiles";
 import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
 

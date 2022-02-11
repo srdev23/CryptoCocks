@@ -1,14 +1,7 @@
 import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
 import { ethers } from "hardhat";
-// eslint-disable-next-line node/no-missing-import
-import {
-  CryptoCocks,
-  TestToken,
-  // eslint-disable-next-line node/no-missing-import
-} from "../typechain";
-// eslint-disable-next-line node/no-missing-import
+import { CryptoCocks, TestToken } from "../typechain";
 import { BigNumber, Signer } from "ethers";
-// eslint-disable-next-line node/no-missing-import
 import { setBalance } from "./helper";
 
 import * as dotenv from "dotenv";

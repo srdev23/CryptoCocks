@@ -1,13 +1,11 @@
 import * as dotenv from "dotenv";
 import { ethers } from "hardhat";
-// eslint-disable-next-line node/no-missing-import
 import { CryptoCocks } from "../typechain";
 import {
   saveABIJson,
   saveAddressesJson,
   saveChainJson,
   saveOwnerJson,
-  // eslint-disable-next-line node/no-missing-import
 } from "./generator";
 dotenv.config();
 

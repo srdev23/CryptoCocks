@@ -1,6 +1,5 @@
 import { expect } from "chai";
 import { ethers, waffle } from "hardhat";
-// eslint-disable-next-line node/no-missing-import
 import { Contracts, deploy } from "./deploy";
 import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
 import {
@@ -11,12 +10,9 @@ import {
   mint,
   mintTestToken,
   setContractToPublicSale,
-  // eslint-disable-next-line node/no-missing-import
 } from "./helper";
 import { BigNumber, Signer } from "ethers";
-// eslint-disable-next-line node/no-missing-import
 import { TestToken } from "../typechain";
-// eslint-disable-next-line node/no-missing-import
 import { loadPercentileData, PercentileDataEntry } from "./percentiles";
 
 const PERCENTAGE_TEAM = 50;
