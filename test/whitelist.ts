@@ -28,6 +28,11 @@ describe("Whitelist", function () {
     contracts = await deploy(owner);
   });
 
+  it("should revert when trying to get a contract that does not exist", async () => {
+    const tx = contracts.cryptoCocks.getListContract(0);
+    await expect(tx).to.be.revertedWith("LC_NOT_FOUND");
+  });
+
   describe("Add Contracts", function () {
     it("should be possible to add a whitelisted contract", async () => {
       const percRoyal = 10;
@@ -119,6 +124,26 @@ describe("Whitelist", function () {
           expectRevert
         );
       }
+    });
+  });
+
+  describe("Remove Contracts", function () {
+    const listContractId = 0;
+
+    beforeEach(async () => {
+      const communityWallet = signer1;
+      const testToken = contracts.testTokenOne;
+
+      await addWhitelistedContract(
+        contracts.cryptoCocks,
+        owner,
+        testToken.address,
+        listContractId,
+        communityWallet,
+        2,
+        100,
+        10
+      );
     });
   });
 
