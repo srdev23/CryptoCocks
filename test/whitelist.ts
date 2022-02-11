@@ -10,6 +10,7 @@ import {
   addWhitelistedContract,
   addWhitelistedERC1155Contract,
   assertBalanceOf,
+  assertListContract,
   CommunityTokenHolders,
   // eslint-disable-next-line node/no-missing-import
 } from "./helper";
@@ -28,6 +29,11 @@ describe("Whitelist", function () {
     contracts = await deploy(owner);
   });
 
+  it("should revert when trying to get a contract that does not exist", async () => {
+    const tx = contracts.cryptoCocks.getListContract(0);
+    await expect(tx).to.be.revertedWith("LC_NOT_FOUND");
+  });
+
   describe("Add Contracts", function () {
     it("should be possible to add a whitelisted contract", async () => {
       const percRoyal = 10;
@@ -35,16 +41,21 @@ describe("Whitelist", function () {
       const minBalance = 100;
       const communityWallet = signer1;
       const testToken = contracts.testTokenOne;
+      const id = 0;
 
       await addWhitelistedContract(
         contracts.cryptoCocks,
         owner,
         testToken.address,
+        id,
         communityWallet,
         maxSupply,
         minBalance,
         percRoyal
       );
+
+      const tx = contracts.cryptoCocks.getListContract(0);
+      await expect(tx).to.not.be.reverted;
     });
 
     it("should be possible to add a whitelisted contract by owner only", async () => {
@@ -60,6 +71,7 @@ describe("Whitelist", function () {
         contracts.cryptoCocks
           .connect(nonOwner)
           .addWhiteListing(
+            0,
             false,
             cc,
             wallet,
@@ -76,16 +88,19 @@ describe("Whitelist", function () {
       const communityWallet = signer1;
       const testToken = contracts.testTokenOne;
 
+      let index = 0;
       for (const percRoyal of percRoyals) {
         await addWhitelistedContract(
           contracts.cryptoCocks,
           owner,
           testToken.address,
+          index,
           communityWallet,
           2,
           100,
           percRoyal
         );
+        index++;
       }
     });
 
@@ -106,6 +121,7 @@ describe("Whitelist", function () {
           contracts.cryptoCocks,
           owner,
           testToken.address,
+          index,
           communityWallet,
           2,
           100,
@@ -113,6 +129,63 @@ describe("Whitelist", function () {
           expectRevert
         );
       }
+    });
+  });
+
+  describe("Remove Contracts", function () {
+    const listContractId1 = 0;
+    const listContractId2 = 1;
+
+    beforeEach(async () => {
+      const communityWallet = signer1;
+      const testToken = contracts.testTokenOne;
+
+      await addWhitelistedContract(
+        contracts.cryptoCocks,
+        owner,
+        testToken.address,
+        listContractId1,
+        communityWallet,
+        2,
+        100,
+        10
+      );
+
+      await addWhitelistedContract(
+        contracts.cryptoCocks,
+        owner,
+        testToken.address,
+        listContractId2,
+        communityWallet,
+        2,
+        100,
+        10
+      );
+    });
+
+    it("should be possible to remove a contract", async () => {
+      await assertListContract(contracts.cryptoCocks, listContractId1);
+      const tx1 = contracts.cryptoCocks
+        .connect(owner)
+        .removeWhitelisting(listContractId1);
+      await expect(tx1).to.not.be.reverted;
+      await assertListContract(contracts.cryptoCocks, listContractId1, false);
+
+      await assertListContract(contracts.cryptoCocks, listContractId2);
+      const tx2 = contracts.cryptoCocks
+        .connect(owner)
+        .removeWhitelisting(listContractId2);
+      await expect(tx2).to.not.be.reverted;
+      await assertListContract(contracts.cryptoCocks, listContractId2, false);
+    });
+
+    it("should be possible to remove a contract by owner only", async () => {
+      await assertListContract(contracts.cryptoCocks, listContractId1);
+      const tx = contracts.cryptoCocks
+        .connect(nonOwner)
+        .removeWhitelisting(listContractId1);
+      await expect(tx).to.be.reverted;
+      await assertListContract(contracts.cryptoCocks, listContractId1);
     });
   });
 
@@ -186,6 +259,7 @@ describe("Whitelist", function () {
         contracts.cryptoCocks,
         owner,
         COMMUNITY_CONTRACTS.kryptonauten,
+        0,
         BigNumber.from(
           "0x043dd28dedaf4209e7aa7ed460e2a45e0915b7eb000000000000000000000001"
         ),
@@ -200,6 +274,7 @@ describe("Whitelist", function () {
         contracts.cryptoCocks,
         owner,
         COMMUNITY_CONTRACTS.duckdao,
+        1,
         signer1,
         MAX_SUPPLY.duckdao,
         MIN_BALANCE.duckdao,
@@ -211,6 +286,7 @@ describe("Whitelist", function () {
         contracts.cryptoCocks,
         owner,
         COMMUNITY_CONTRACTS.lobsterdao,
+        2,
         signer1,
         MAX_SUPPLY.lobsterdao,
         MIN_BALANCE.lobsterdao,
@@ -222,6 +298,7 @@ describe("Whitelist", function () {
         contracts.cryptoCocks,
         owner,
         COMMUNITY_CONTRACTS.cyberkongz,
+        3,
         signer1,
         MAX_SUPPLY.cyberkongz,
         MIN_BALANCE.cyberkongz,
@@ -233,6 +310,7 @@ describe("Whitelist", function () {
         contracts.cryptoCocks,
         owner,
         COMMUNITY_CONTRACTS.daomaker,
+        4,
         signer1,
         MAX_SUPPLY.daomaker,
         MIN_BALANCE.daomaker,
@@ -244,6 +322,7 @@ describe("Whitelist", function () {
         contracts.cryptoCocks,
         owner,
         COMMUNITY_CONTRACTS.neotokyo,
+        5,
         signer1,
         MAX_SUPPLY.neotokyo,
         MIN_BALANCE.neotokyo,

@@ -92,6 +92,7 @@ export async function getMintValue(signer: Signer, percFee: number = 100) {
  * @param cryptoCocks Deployed CryptoCocks contract
  * @param owner Owner account that deployed the CryptoCocks contract
  * @param tokenContractAddress TestToken contract
+ * @param id
  * @param communityWallet Signer
  * @param maxSupply Maximum supply
  * @param minBalance Minimum balance
@@ -102,6 +103,7 @@ export async function addWhitelistedContract(
   cryptoCocks: CryptoCocks,
   owner: Signer,
   tokenContractAddress: string,
+  id: number,
   communityWallet: SignerWithAddress,
   maxSupply: number,
   minBalance: number,
@@ -112,6 +114,7 @@ export async function addWhitelistedContract(
     cryptoCocks,
     owner,
     tokenContractAddress,
+    id,
     communityWallet,
     maxSupply,
     minBalance,
@@ -124,6 +127,7 @@ export async function addWhitelistedERC1155Contract(
   cryptoCocks: CryptoCocks,
   owner: Signer,
   tokenContractAddress: string,
+  id: number,
   erc1155Id: BigNumber,
   communityWallet: SignerWithAddress,
   maxSupply: number,
@@ -134,6 +138,7 @@ export async function addWhitelistedERC1155Contract(
     cryptoCocks,
     owner,
     tokenContractAddress,
+    id,
     communityWallet,
     maxSupply,
     minBalance,
@@ -147,6 +152,7 @@ async function _addWhitelistedContract(
   cryptoCocks: CryptoCocks,
   owner: Signer,
   tokenContractAddress: string,
+  id: number,
   communityWallet: SignerWithAddress,
   maxSupply: number,
   minBalance: number,
@@ -157,8 +163,6 @@ async function _addWhitelistedContract(
   const cc = tokenContractAddress;
   const wallet = communityWallet.address;
 
-  const initialNumContracts = (await cryptoCocks.whitelist()).numContracts;
-
   const isERC1155 = !!erc1155Id;
 
   if (revert) {
@@ -166,6 +170,7 @@ async function _addWhitelistedContract(
       cryptoCocks
         .connect(owner)
         .addWhiteListing(
+          id,
           isERC1155,
           cc,
           wallet,
@@ -180,6 +185,7 @@ async function _addWhitelistedContract(
       cryptoCocks
         .connect(owner)
         .addWhiteListing(
+          id,
           isERC1155,
           cc,
           wallet,
@@ -190,11 +196,7 @@ async function _addWhitelistedContract(
         )
     ).to.not.be.reverted;
 
-    const whitelist = await cryptoCocks.whitelist();
-    const numContracts = whitelist.numContracts;
-    const whiteListed = await cryptoCocks.getListContract(numContracts - 1); // index starts with 0
-
-    expect(numContracts).to.equal(initialNumContracts + 1);
+    const whiteListed = await cryptoCocks.getListContract(id); // index starts with 0
     expect(whiteListed.percRoyal).to.equal(percRoyal);
     expect(whiteListed.maxSupply).to.equal(maxSupply);
     expect(whiteListed.minBalance).to.equal(minBalance);
@@ -219,7 +221,6 @@ export async function mintTestToken(
   signer: SignerWithAddress,
   cryptoCocks: CryptoCocks,
   testToken: TestToken,
-  listIndex: number,
   times: number
 ) {
   const receiptPromises = [...Array(times)].map(async () => {
@@ -227,7 +228,7 @@ export async function mintTestToken(
   });
   // wait for all transactions and then assert balance
   Promise.all(receiptPromises).then(async () => {
-    const balance = await cryptoCocks.queryBalance(listIndex, signer.address);
+    const balance = await testToken.balanceOf(signer.address);
     expect(balance).to.equal(BigNumber.from(times));
   });
 }
@@ -411,4 +412,17 @@ export async function setBalance(account: SignerWithAddress, wei: BigNumber) {
   // https://github.com/nomiclabs/hardhat/issues/1585#issuecomment-963277815
   const balance = wei.toHexString().replace(/0x0+/, "0x");
   await network.provider.send("hardhat_setBalance", [account.address, balance]);
+}
+
+export async function assertListContract(
+  cryptoCocks: CryptoCocks,
+  lcId: number,
+  exists: boolean = true
+) {
+  const tx = cryptoCocks.getListContract(lcId);
+  if (exists) {
+    await expect(tx).to.not.be.reverted;
+  } else {
+    await expect(tx).to.be.revertedWith("LC_NOT_FOUND");
+  }
 }

@@ -108,6 +108,7 @@ describe("Transfers", function () {
         contracts.cryptoCocks,
         owner,
         communityToken.address,
+        0,
         communityWallet,
         maxSupply,
         minBalance,
@@ -118,7 +119,6 @@ describe("Transfers", function () {
         communityTokenHolder,
         contracts.cryptoCocks,
         contracts.testTokenOne,
-        0,
         minBalance
       );
     });
