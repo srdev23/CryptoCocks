@@ -413,3 +413,16 @@ export async function setBalance(account: SignerWithAddress, wei: BigNumber) {
   const balance = wei.toHexString().replace(/0x0+/, "0x");
   await network.provider.send("hardhat_setBalance", [account.address, balance]);
 }
+
+export async function assertListContract(
+  cryptoCocks: CryptoCocks,
+  lcId: number,
+  exists: boolean = true
+) {
+  const tx = cryptoCocks.getListContract(lcId);
+  if (exists) {
+    await expect(tx).to.not.be.reverted;
+  } else {
+    await expect(tx).to.be.revertedWith("LC_NOT_FOUND");
+  }
+}

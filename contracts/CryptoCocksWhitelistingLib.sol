@@ -173,6 +173,20 @@ library CryptoCocksWhitelistingLib {
         self.usedRoyal += percRoyal;
     }
 
+    function getListContract(Whitelist storage self, uint8 lcId) public view returns (ListContract storage lc) {
+        if (contains(self, lcId)) {
+            uint8 idx = self.lists._indexes[lcId] - 1;
+            return at(self, idx);
+        }
+        revert("LC_NOT_FOUND");
+    }
+
+    function removeContract(Whitelist storage self, uint8 lcId) public {
+        ListContract storage lc = getListContract(self, lcId);
+        self.usedRoyal -= lc.percRoyal;
+        remove(self, lcId);
+    }
+
     function popRoyalties(Whitelist storage self, address wallet) external returns(uint128 balance) {
         for (uint8 i = 0; (i < length(self)); i++) {
             ListContract storage lc = at(self, i);
@@ -183,13 +197,5 @@ library CryptoCocksWhitelistingLib {
             }
         }
         revert("NO_COMMUNITY_WALLET");
-    }
-
-    function getListContract(Whitelist storage self, uint8 lcId) external view returns (ListContract storage lc) {
-        if (contains(self, lcId)) {
-            uint8 idx = self.lists._indexes[lcId] - 1;
-            return at(self, idx);
-        }
-        revert("LC_NOT_FOUND");
     }
 }

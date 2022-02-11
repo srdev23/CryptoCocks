@@ -157,6 +157,10 @@ contract CryptoCocks is ERC721("CryptoCocks", "CC"), ERC721Enumerable, ERC721URI
         whitelist.addContract(id, erc1155, cc, wallet, maxSupply, minBalance, percRoyal, erc1155Id);
     }
 
+    function removeWhitelisting(uint8 lcId) external onlyOwner {
+        whitelist.removeContract(lcId);
+    }
+
     /**
      * Transfer royalties from contract address to registered community wallet
      */
@@ -178,8 +182,8 @@ contract CryptoCocks is ERC721("CryptoCocks", "CC"), ERC721Enumerable, ERC721URI
         set.isWhitelistingEnabled = enabled;
     }
 
-    function getListContract(uint8 idx) external view returns (CryptoCocksWhitelistingLib.ListContract memory lc) {
-        return whitelist.getListContract(idx);
+    function getListContract(uint8 lcId) external view returns (CryptoCocksWhitelistingLib.ListContract memory lc) {
+        return whitelist.getListContract(lcId);
     }
 
     function queryBalance(uint8 listIndex, address addressToQuery) external view returns (uint) {

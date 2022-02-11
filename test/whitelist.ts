@@ -10,6 +10,7 @@ import {
   addWhitelistedContract,
   addWhitelistedERC1155Contract,
   assertBalanceOf,
+  assertListContract,
   CommunityTokenHolders,
   // eslint-disable-next-line node/no-missing-import
 } from "./helper";
@@ -148,6 +149,24 @@ describe("Whitelist", function () {
         100,
         10
       );
+    });
+
+    it("should be possible to remove a contract", async () => {
+      await assertListContract(contracts.cryptoCocks, listContractId);
+      const tx = contracts.cryptoCocks
+        .connect(owner)
+        .removeWhitelisting(listContractId);
+      await expect(tx).to.not.be.reverted;
+      await assertListContract(contracts.cryptoCocks, listContractId, false);
+    });
+
+    it("should be possible to remove a contract by owner only", async () => {
+      await assertListContract(contracts.cryptoCocks, listContractId);
+      const tx = contracts.cryptoCocks
+        .connect(nonOwner)
+        .removeWhitelisting(listContractId);
+      await expect(tx).to.be.reverted;
+      await assertListContract(contracts.cryptoCocks, listContractId);
     });
   });
 
