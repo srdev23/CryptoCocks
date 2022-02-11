@@ -185,7 +185,11 @@ library CryptoCocksWhitelistingLib {
         revert("NO_COMMUNITY_WALLET");
     }
 
-    function getListContract(Whitelist storage self, uint8 idx) external view returns (ListContract storage lc) {
-        return at(self, idx);
+    function getListContract(Whitelist storage self, uint8 lcId) external view returns (ListContract storage lc) {
+        if (contains(self, lcId)) {
+            uint8 idx = self.lists._indexes[lcId] - 1;
+            return at(self, idx);
+        }
+        revert("LC_NOT_FOUND");
     }
 }
