@@ -14,25 +14,29 @@ interface Token1155 {
 library CryptoCocksWhitelistingLib {
     uint8 private constant MAX_PERC_ROYALTIES = 20;
 
+    /**
+     * Whitelisted community contract
+     */
     struct ListContract {
-        bool erc1155;
-        uint8 id;
+        bool erc1155; // true if contract implements IERC11555 otherwise IERC20/IERC721
+        uint8 id; // unique identifier of a ListContract instance
         uint8 percRoyal; // percentage royal fee for each contract
         uint16 maxSupply; // max NFTs for whitelisted owners
         uint16 minBalance; // min balance needed on whitelisted contracts
         uint16 tracker; // tracking number of minted NFTs per whitelisted contract
         uint128 balance;  // tracking accumulated royalty fee
-        uint256 erc1155Id; // erc1155 id
+        uint256 erc1155Id; // erc1155 token type id
         address cc; // community contract addresses
         address wallet; // community wallet addresses
     }
 
     struct Set {
-        // Storage of set values
+        // storage of ListContract instances
         ListContract[] _values;
-        // Position of the value in the `values` array, plus 1 because index 0
-        // means a value is not in the set.
-        mapping(uint8 => uint8) _indexes; // Unique ListContract Identifier to Index
+
+        // position of a ListContract in the `values` array, plus 1 because index 0
+        // means a ListContract is not in the set.
+        mapping(uint8 => uint8) _indexes;
     }
 
     struct Whitelist {
@@ -41,9 +45,9 @@ library CryptoCocksWhitelistingLib {
     }
 
     /**
-     * @dev Add a value to a set. O(1).
+     * @dev Add a ListContract to the set. O(1).
      *
-     * Returns true if the value was added to the set, that is if it was not
+     * Returns true if the ListContract was added to the set, that is if it was not
      * already present.
      */
     function add(Whitelist storage self, ListContract memory lc) private returns (bool) {
@@ -59,7 +63,7 @@ library CryptoCocksWhitelistingLib {
     /**
      * @dev Removes a ListContract by id. O(1).
      *
-     * Returns true if the value was removed from the set, that is if it was
+     * Returns true if the ListContract was removed from the set, that is if it was
      * present.
      */
     function remove(Whitelist storage self, uint8 lcId) private returns (bool) {
@@ -96,27 +100,26 @@ library CryptoCocksWhitelistingLib {
     }
 
     /**
-     * @dev Returns true if the list contract with an identifier is already in the set. O(1).
+     * @dev Returns true if the ListContract with an identifier is already in the set. O(1).
      */
     function contains(Whitelist storage self, uint8 id) private view returns (bool) {
         return self.lists._indexes[id] != 0;
     }
 
     /**
-     * @dev Returns the number of values on the set. O(1).
+     * @dev Returns the number of ListContract instances on the set. O(1).
      */
     function length(Whitelist storage self) private view returns (uint8) {
         return SafeCast.toUint8(self.lists._values.length);
     }
 
     /**
-     * @dev Returns the value stored at position `index` in the set. O(1).
+     * @dev Returns the ListContract stored at position `index` in the set. O(1).
      *
-     * Note that there are no guarantees on the ordering of values inside the
+     * Note that there are no guarantees on the ordering of instances inside the
      * array, and it may change when more values are added or removed.
      *
      * Requirements:
-     *
      * - `index` must be strictly less than {length}.
      */
     function at(Whitelist storage self, uint8 index) private view returns (ListContract storage) {
