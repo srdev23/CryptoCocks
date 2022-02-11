@@ -131,12 +131,12 @@ library CryptoCocksWhitelistingLib {
         return lc.erc1155 ? Token1155(lc.cc).balanceOf(addressToQuery, lc.erc1155Id) : Token(lc.cc).balanceOf(addressToQuery);
     }
 
-    function increaseSupply(Whitelist storage self, uint8 idx) public {
+    function increaseSupply(Whitelist storage self, uint8 idx) external {
         ListContract storage lc = at(self, idx);
         lc.tracker += 1;
     }
 
-    function depositRoyalties(Whitelist storage self, uint128 value) public {
+    function depositRoyalties(Whitelist storage self, uint128 value) external {
         for (uint8 idx = 0; (idx < length(self)); idx++) {
             ListContract storage lc = at(self, idx);
             lc.balance += uint128((value * lc.percRoyal) / 100);
