@@ -45,6 +45,20 @@ describe("Settings", function () {
     ).to.be.reverted;
   });
 
+  it("should be possible to execute changeWhitelistingSettings by owner only", async () => {
+    await expect(
+      contracts.cryptoCocks.connect(owner).changeWhitelistingSettings(true)
+    ).to.not.be.reverted;
+
+    await expect(
+      contracts.cryptoCocks.connect(owner).changeWhitelistingSettings(false)
+    ).to.not.be.reverted;
+
+    await expect(
+      contracts.cryptoCocks.connect(nonOwner).changeWhitelistingSettings(true)
+    ).to.be.reverted;
+  });
+
   it("should not be possible to have zero percFee without freeMinting", async () => {
     const freeMinting = false;
     const percFee = 0;

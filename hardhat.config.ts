@@ -9,7 +9,6 @@ import "hardhat-abi-exporter";
 import "hardhat-contract-sizer";
 import { removeConsoleLog } from "hardhat-preprocessor";
 import { HardhatRuntimeEnvironment } from "hardhat/types";
-const accounts = require("./accounts.json");
 
 dotenv.config();
 
@@ -26,7 +25,14 @@ const config: HardhatUserConfig = {
       gasMultiplier: 1.3,
     },
     hardhat: {
-      accounts,
+      accounts: {
+        mnemonic: process.env.MNEMONIC,
+        count: 200,
+      },
+      forking: {
+        url: process.env.MAINNET_URL || "",
+        blockNumber: 14177424,
+      },
     },
     ropsten: {
       url: process.env.ROPSTEN_URL || "",

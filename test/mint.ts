@@ -68,7 +68,8 @@ describe("Mint", function () {
         await addWhitelistedContract(
           contracts.cryptoCocks,
           owner,
-          contracts.testTokenOne,
+          contracts.testTokenOne.address,
+          0,
           signer1,
           maxSupply,
           minBalance,
@@ -94,7 +95,7 @@ describe("Mint", function () {
         await mintRevert(contracts.cryptoCocks, signer3);
 
         // tracks the number of minted tokens for TestTokenOne
-        const contract = await contracts.cryptoCocks.list(0);
+        const contract = await contracts.cryptoCocks.getListContract(0);
         expect(contract.tracker).to.equal(1);
       });
     });
@@ -139,7 +140,8 @@ describe("Mint", function () {
         await addWhitelistedContract(
           contracts.cryptoCocks,
           owner,
-          contracts.testTokenOne,
+          contracts.testTokenOne.address,
+          0,
           signer1,
           2,
           minBalanceTokenOne,
@@ -149,7 +151,8 @@ describe("Mint", function () {
         await addWhitelistedContract(
           contracts.cryptoCocks,
           owner,
-          contracts.testTokenTwo,
+          contracts.testTokenTwo.address,
+          1,
           signer2,
           2,
           minBalanceTokenTwo,
@@ -210,11 +213,11 @@ describe("Mint", function () {
         }
 
         // tracks the number of minted tokens for TestTokenOne
-        const contract1 = await contracts.cryptoCocks.list(0);
+        const contract1 = await contracts.cryptoCocks.getListContract(0);
         expect(contract1.tracker).to.equal(2);
 
         // tracks the number of minted tokens for TestTokenTwo
-        const contract2 = await contracts.cryptoCocks.list(1);
+        const contract2 = await contracts.cryptoCocks.getListContract(1);
         expect(contract2.tracker).to.equal(2);
       });
 
@@ -229,7 +232,7 @@ describe("Mint", function () {
         await mintRevert(contracts.cryptoCocks, signer3);
 
         // tracks the number of minted tokens for TestTokenOne
-        const contract1 = await contracts.cryptoCocks.list(0);
+        const contract1 = await contracts.cryptoCocks.getListContract(0);
         expect(contract1.tracker).to.equal(0);
       });
     });
@@ -277,7 +280,7 @@ describe("Mint", function () {
   describe("Length Calculation", function () {
     it("should calculate lengths correctly for fixed fee", async () => {
       for (let i = 0; i < 100; i++) {
-        const minter = await getMinter(minters, 0, i, percentileData);
+        const minter = await getMinter(minters, i, percentileData);
         const balance = await minter.getBalance();
         const tx = await mint(contracts.cryptoCocks, minter);
 
@@ -305,7 +308,7 @@ describe("Mint", function () {
           });
         }
 
-        const minter = await getMinter(minters, 1, i, percentileData);
+        const minter = await getMinter(minters, i, percentileData);
         const balance = await minter.getBalance();
         const tx = await mint(contracts.cryptoCocks, minter, percFee);
 
@@ -328,7 +331,7 @@ describe("Mint", function () {
 
     it("should set the token URI correctly", async () => {
       for (let i = 0; i < 100; i++) {
-        const minter = await getMinter(minters, 2, i, percentileData);
+        const minter = await getMinter(minters, i, percentileData);
         await mint(contracts.cryptoCocks, minter);
 
         const tokenId = i + 30 + 1;
@@ -343,7 +346,7 @@ describe("Mint", function () {
 
     it("should calculate lengths correctly for a late initMint", async () => {
       for (let i = 0; i < 100; i++) {
-        const minter = await getMinter(minters, 3, i, percentileData);
+        const minter = await getMinter(minters, i, percentileData);
         await mint(contracts.cryptoCocks, minter);
       }
 
@@ -386,7 +389,7 @@ describe("Mint", function () {
       const numberTokens = 100;
 
       for (let i = 0; i < numberTokens; i++) {
-        const minter = await getMinter(minters, 5, i, percentileData);
+        const minter = await getMinter(minters, i, percentileData);
         const tx = mint(contracts.cryptoCocks, minter);
         const tokenId = i + 31;
         await expect(tx)

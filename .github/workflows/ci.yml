@@ -1,4 +1,4 @@
-name: 'build-api'
+name: 'Contract CI Pipeline'
 on: ["push"]
 jobs:
   test:
@@ -17,9 +17,11 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-node-
       - run: npm install
-      - run: npm run generate:accounts
       - run: npm run compile
       - run: npm run coverage
+        env:
+          MNEMONIC: ${{ secrets.MNEMONIC }}
+          MAINNET_URL: ${{ secrets.MAINNET_URL }}
       - uses: codecov/codecov-action@v2
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
@@ -40,7 +42,6 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-node-
       - run: npm install
-      - run: npm run generate:accounts
       - run: npm run compile
       - run: npm run check
       - run: npm run lint
@@ -64,5 +65,4 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-node-
       - run: npm install
-      - run: npm run generate:accounts
       - run: slither . --filter-paths "hardhat|openzeppelin"

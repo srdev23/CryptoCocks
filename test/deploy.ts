@@ -7,7 +7,9 @@ import {
   // eslint-disable-next-line node/no-missing-import
 } from "../typechain";
 // eslint-disable-next-line node/no-missing-import
-import { Signer } from "ethers";
+import { BigNumber, Signer } from "ethers";
+// eslint-disable-next-line node/no-missing-import
+import { setBalance } from "./helper";
 
 export interface Contracts {
   cryptoCocks: CryptoCocks;
@@ -35,11 +37,19 @@ export async function deployContracts(signer: Signer) {
   const cryptoCocksLib = await CryptoCocksLib.deploy();
   await cryptoCocksLib.deployed();
 
+  const CryptoCocksWhitelistingLib = await ethers.getContractFactory(
+    "CryptoCocksWhitelistingLib",
+    signer
+  );
+  const cryptoCocksWhitelistingLib = await CryptoCocksWhitelistingLib.deploy();
+  await cryptoCocksWhitelistingLib.deployed();
+
   // deploy crypto cocks contract
   const CryptoCocks = await ethers.getContractFactory("CryptoCocks", {
     libraries: {
       OrderStatisticsTreeLib: orderStatisticsTreeLib.address,
       CryptoCocksLib: cryptoCocksLib.address,
+      CryptoCocksWhitelistingLib: cryptoCocksWhitelistingLib.address,
     },
     signer,
   });
@@ -71,6 +81,7 @@ export async function deployTestTokenContracts(signer: Signer) {
  * Also links the library and the CryptoCocks contract.
  */
 export async function deploy(owner: SignerWithAddress): Promise<Contracts> {
+  await setBalance(owner, BigNumber.from(ethers.utils.parseEther("10"))); // make sure owner has enough funds
   const contracts = {} as Contracts;
   contracts.cryptoCocks = await deployContracts(owner);
   const [contract1, contract2] = await deployTestTokenContracts(owner);

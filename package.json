@@ -3,6 +3,7 @@
   "version": "0.0.1",
   "scripts": {
     "compile": "hardhat compile",
+    "clean": "hardhat clean",
     "test": "hardhat test",
     "node": "hardhat node",
     "test:no-logs": "HIDE_CONTRACT_LOGS=true hardhat test",
@@ -11,7 +12,6 @@
     "coverage": "hardhat coverage",
     "lint": "eslint '**/*.{js,ts}'",
     "lint:fix": "hardhat compile && eslint '**/*.{js,ts}' --fix",
-    "generate:accounts": "ts-node accounts.ts",
     "deploy:rinkeby": "hardhat run scripts/deploy.ts --network rinkeby",
     "deploy:mainnet": "hardhat run scripts/deploy.ts --network mainnet",
     "deploy": "hardhat run scripts/deploy.ts --network localhost",
