@@ -40,17 +40,21 @@ describe("Whitelist", function () {
       const minBalance = 100;
       const communityWallet = signer1;
       const testToken = contracts.testTokenOne;
+      const id = 0;
 
       await addWhitelistedContract(
         contracts.cryptoCocks,
         owner,
         testToken.address,
-        0,
+        id,
         communityWallet,
         maxSupply,
         minBalance,
         percRoyal
       );
+
+      const tx = contracts.cryptoCocks.getListContract(0);
+      await expect(tx).to.not.be.reverted;
     });
 
     it("should be possible to add a whitelisted contract by owner only", async () => {
