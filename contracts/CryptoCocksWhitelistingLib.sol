@@ -131,6 +131,7 @@ library CryptoCocksWhitelistingLib {
      */
     function queryBalance(Whitelist storage self, uint8 listIndex, address addressToQuery) public view returns (uint) {
         ListContract storage lc = at(self, listIndex);
+        // slither-disable-next-line calls-loop
         return lc.erc1155 ? Token1155(lc.cc).balanceOf(addressToQuery, lc.erc1155Id) : Token(lc.cc).balanceOf(addressToQuery);
     }
 
